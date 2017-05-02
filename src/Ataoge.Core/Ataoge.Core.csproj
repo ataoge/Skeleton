@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard1.6</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+  <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
+</PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="JetBrains.Annotations" Version="10.4.0" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="1.1.1"/>
+    <PackageReference Include="System.Security.Claims" Version="4.3.0"/>
+    <PackageReference Include="System.Linq.Queryable" Version="4.3.0"/>
+  </ItemGroup>
+</Project>
