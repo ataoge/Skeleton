@@ -7,7 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9CFF5B30-B56
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ataoge.Core", "src\Ataoge.Core\Ataoge.Core.csproj", "{D40D25FF-A0D0-4394-B665-6FC2F407647A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ataoge.AspnetCore", "src\Ataoge.AspnetCore\Ataoge.AspnetCore.csproj", "{4C20DC67-E330-4383-9059-5DF58C5DDF83}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ataoge.AspNetCore", "src\Ataoge.AspNetCore\Ataoge.AspNetCore.csproj", "{4C20DC67-E330-4383-9059-5DF58C5DDF83}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ataoge.EntityFrameworkCore", "src\Ataoge.EntityFrameworkCore\Ataoge.EntityFrameworkCore.csproj", "{59EA95DF-5BC5-4B63-BBF2-A9DEBEB3B22B}"
 EndProject

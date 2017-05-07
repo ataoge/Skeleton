@@ -120,7 +120,7 @@ namespace Ataoge.Security
             //Must have a IS-A relation of types or must be same type
             var typeOfThis = GetType();
             var typeOfOther = other.GetType();
-            if (!typeOfThis.GetTypeInfo().IsAssignableFrom(typeOfOther) && !typeOfOther.GetTypeInfo().IsAssignableFrom(typeOfThis))
+            if (!typeOfThis.GetTypeInfo().IsAssignableFrom(typeOfOther.GetTypeInfo()) && !typeOfOther.GetTypeInfo().IsAssignableFrom(typeOfThis.GetTypeInfo()))
             {
                 return false;
             }

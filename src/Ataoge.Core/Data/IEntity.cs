@@ -26,7 +26,13 @@ namespace Ataoge.Data
     /// </summary>
     /// <typeparam name="TKey"></typeparam>
     public interface ITreeEntity<TKey> : IEntity<TKey>
+        where TKey : struct
     {
-        TKey Pid { get; set; }
+        TKey? Pid { get; set; }
+    }
+
+    public interface ITreeEntity : IEntity<string>
+    {
+        string Pid {get; set;}
     }
 }

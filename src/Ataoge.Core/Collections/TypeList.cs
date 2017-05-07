@@ -134,7 +134,7 @@ namespace Ataoge.Collections
 
         private static void CheckType(Type item)
         {
-            if (!typeof(TBaseType).GetTypeInfo().IsAssignableFrom(item))
+            if (!typeof(TBaseType).GetTypeInfo().IsAssignableFrom(item.GetTypeInfo()))
             {
                 throw new ArgumentException("Given item is not type of " + typeof(TBaseType).AssemblyQualifiedName, "item");
             }

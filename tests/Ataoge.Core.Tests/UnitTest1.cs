@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Ataoge.Configuration;
+using Ataoge.Modules;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -36,11 +37,24 @@ namespace Ataoge.Core.Tests
 
             IServiceProvider sp = services.BuildServiceProvider();
 
-            //IOptions<ExampleOption> optionsAccesstor = sp.GetService<IOptions<ExampleOption>>();
-            //Console.WriteLine($"{optionsAccesstor.Value.Array[0]}, {optionsAccesstor.Value.Array[1]}");
+            IOptions<ExampleOption> optionsAccesstor = sp.GetService<IOptions<ExampleOption>>();
+            Console.WriteLine($"{optionsAccesstor.Value.Array[0]}, {optionsAccesstor.Value.Array[1]}");
 
             var result = false;
              Assert.False(result, $"1 should not be prime");
+        }
+
+          [Fact]
+        public void TestStartupConfiguration()
+        {
+            IServiceCollection services = new ServiceCollection();
+            IModuleManager modulManager = new ModuleManager();
+            modulManager.Initialize(typeof(KernelModule));
+            modulManager.ConfigModules(services);
+            services.AddSingleton<IModuleManager>(modulManager);
+            IServiceProvider sp = services.BuildServiceProvider();
+            IStartupConfiguration startupConfig = sp.GetService<IStartupConfiguration>();
+            Assert.False(startupConfig.MultiTenancy.IsEnabled,$"1 should not be prime");
         }
     }
 }
