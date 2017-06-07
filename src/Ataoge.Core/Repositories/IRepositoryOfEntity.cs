@@ -37,6 +37,10 @@ namespace Ataoge.Repositories
         /// </summary>
         TEntity Single(Expression<Func<TEntity, bool>> predicate);
 
+        TEntity SingleOrDefault(Expression<Func<TEntity, bool>> predicate);
+
+        Task<TEntity> SingleOrDefaultAsync(Expression<Func<TEntity, bool>> predicate);
+
         Task<TEntity> SingleAsync(Expression<Func<TEntity, bool>> predicate);
 
         TEntity FirstOrDefault(Expression<Func<TEntity, bool>> predicate);

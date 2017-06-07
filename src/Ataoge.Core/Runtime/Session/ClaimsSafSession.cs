@@ -22,8 +22,7 @@ namespace Ataoge.Runtime.Session
                 {
                     return default(TKey);
                 }
-
-                return (TKey)Convert.ChangeType(userIdClaim, typeof(TKey));
+                return (TKey)Convert.ChangeType(userIdClaim.Value, typeof(TKey));
             }
         }
 

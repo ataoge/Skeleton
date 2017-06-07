@@ -22,7 +22,7 @@ namespace Ataoge.Modules
         /// </summary>
         /// <typeparam name="TModule">Module type</typeparam>
         /// <returns>Reference to the module instance</returns>
-        public TModule GetModule<TModule>() where TModule : Module
+        public TModule GetModule<TModule>() where TModule : ModuleBase
         {
             var module = this.FirstOrDefault(m => m.Type == typeof(TModule));
             if (module == null)

@@ -10,6 +10,7 @@ using Ataoge.EntityFrameworkCore.Repositories;
 using Ataoge.Extensions;
 using Ataoge.Reflection;
 using Ataoge.Repositories;
+using Ataoge.Runtime.Session;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -20,6 +21,18 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace  Ataoge.EntityFrameworkCore
 {
+    public class AtaogeDbContext<TKey> :AtaogeDbContext
+        where TKey : IEquatable<TKey>
+    {
+        protected AtaogeDbContext(DbContextOptions options, ISafSession<TKey> safSession)
+            : base (options)
+        {
+            this.SafSession = safSession;
+        }
+
+         protected ISafSession<TKey> SafSession {get;}
+    }
+
     public class AtaogeDbContext : DbContext, IRepositoryContext, IRepositoryHelper
     {
         public AtaogeDbContext(DbContextOptions<AtaogeDbContext> options)
@@ -33,6 +46,17 @@ namespace  Ataoge.EntityFrameworkCore
         {
             InitializeDbContext();
         }
+
+        ///<summary>
+        ///For test only
+        ///</summary>
+        protected AtaogeDbContext()
+        {
+
+        }
+
+       
+
 
         private void InitializeDbContext()
         {
@@ -64,9 +88,25 @@ namespace  Ataoge.EntityFrameworkCore
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-             modelBuilder.Entity<SequencesRule>( b=>{
-                 b.HasKey(t => t.PatternName);
-                 b.Property( t => t.UpdateTime)
+            modelBuilder.Entity<SequencesRule>( b=>{
+                b.HasKey(t => t.PatternName);
+                b.Property(t => t.PatternName)
+                    .HasColumnName(ConvertName(nameof(SequencesRule.PatternName)));
+                b.Property(t => t.MinValue)
+                    .HasColumnName(ConvertName(nameof(SequencesRule.MinValue)));
+                b.Property(t => t.MaxValue)
+                    .HasColumnName(ConvertName(nameof(SequencesRule.MaxValue)));
+                b.Property(t => t.NextValue)
+                    .HasColumnName(ConvertName(nameof(SequencesRule.NextValue)));
+                b.Property(t => t.Continuum)
+                    .HasColumnName(ConvertName(nameof(SequencesRule.Continuum)));
+                b.Property(t => t.TableField)
+                    .HasColumnName(ConvertName(nameof(SequencesRule.TableField)));
+                b.Property(t => t.PreservedCount)
+                    .HasColumnName(ConvertName(nameof(SequencesRule.PreservedCount)));
+                b.Property(t => t.Step)
+                    .HasColumnName(ConvertName(nameof(SequencesRule.Step)));
+                b.Property( t => t.UpdateTime)
                     .HasColumnName(ConvertName(nameof(SequencesRule.UpdateTime)))
                     .ValueGeneratedOnAdd()
                     .IsConcurrencyToken();
@@ -75,11 +115,14 @@ namespace  Ataoge.EntityFrameworkCore
              });
         }
 
-        protected virtual string ConvertName(string fromEntityName)
+        public virtual string ConvertName(string fromEntityName)
         {
             switch (InvariantName)
             {
-                
+                //case "MySql.Data.EntityFrameworkCore":
+                case "Npgsql.EntityFrameworkCore.PostgreSQL":
+                    return fromEntityName.ToLower();
+                case "Microsoft.EntityFrameworkCore.Sqlite":
                 default:
                     return fromEntityName;
             }

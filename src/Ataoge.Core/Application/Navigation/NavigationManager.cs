@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using Ataoge.Dependency;
+using Ataoge.Infrastructure;
 
 namespace Ataoge.Application.Navigation
 {
@@ -12,10 +14,14 @@ namespace Ataoge.Application.Navigation
             get { return Menus["MainMenu"]; }
         }
 
-        public NavigationManager()
+        //private readonly IServiceProvider _sp;
+        private readonly INavigationConfiguration _configuration;
+
+        public NavigationManager(INavigationConfiguration configuration)
         {
+            //_sp = servierProvider;
             //_iocResolver = iocResolver;
-            //_configuration = configuration;
+            _configuration = configuration;
 
             Menus = new Dictionary<string, MenuDefinition>
                     {
@@ -23,9 +29,14 @@ namespace Ataoge.Application.Navigation
                     };
         }
 
-        public void Initialize()
+        public void Initialize(IServiceProvider serviceProvider)
         {
             var context = new NavigationProviderContext(this);
+            foreach (var providerType in _configuration.Providers)
+            {
+                var provider = serviceProvider.GetService(providerType) as NavigationProvider;
+                provider.SetNavigation(context);
+            }
         }
     }
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Ataoge.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Ataoge.Modules
@@ -17,10 +18,14 @@ namespace Ataoge.Modules
 
         private ModuleCollection _modules;
 
-        public ModuleManager()
-        {
+        private SkeletonOptions _SkeletonOptions;
 
+        public ModuleManager(SkeletonOptions skeletonOptions)
+        {
+            this._SkeletonOptions = skeletonOptions;
         }
+
+        public SkeletonOptions SkeletonOptions => _SkeletonOptions;
 
         public virtual void Initialize(Type startupModule)
         {
@@ -31,7 +36,9 @@ namespace Ataoge.Modules
         public virtual void ConfigModules(IServiceCollection services)
         {
             var sortedModules = _modules.GetSortedModuleListByDependency();
-            sortedModules.ForEach(module => module.Instance.ConfigureService(services));
+            sortedModules.ForEach(module => module.Instance.ConfiguringService(services));
+            sortedModules.Reverse();
+            sortedModules.ForEach(module => module.Instance.ConfiguredService(services));
         }
 
         public virtual void StartModules(IServiceProvider serviceProvider)
@@ -40,6 +47,7 @@ namespace Ataoge.Modules
             //sortedModules.ForEach(module => module.Instance.PreInitialize());
             sortedModules.ForEach(module => module.Instance.Initialize(serviceProvider));
             //sortedModules.ForEach(module => module.Instance.PostInitialize());
+          
         }
 
         public virtual void ShutdownModules()
@@ -77,7 +85,7 @@ namespace Ataoge.Modules
         {
             plugInModuleTypes = new List<Type>();
 
-            var modules = Module.FindDependedModuleTypesRecursivelyIncludingGivenModule(_modules.StartupModuleType);
+            var modules = ModuleBase.FindDependedModuleTypesRecursivelyIncludingGivenModule(_modules.StartupModuleType);
             
             //foreach (var plugInModuleType in _abpPlugInManager.PlugInSources.GetAllModules())
             //{
@@ -94,7 +102,7 @@ namespace Ataoge.Modules
         {
             foreach (var moduleType in moduleTypes)
             {
-                var moduleObject = Activator.CreateInstance(moduleType) as Module; //_iocManager.Resolve(moduleType) as AbpModule;
+                var moduleObject = Activator.CreateInstance(moduleType) as ModuleBase; //_iocManager.Resolve(moduleType) as AbpModule;
                 if (moduleObject == null)
                 {
                     throw new SafException("This type is not an ABP module: " + moduleType.AssemblyQualifiedName);
@@ -132,7 +140,7 @@ namespace Ataoge.Modules
                 moduleInfo.Dependencies.Clear();
 
                 //Set dependencies for defined DependsOnAttribute attribute(s).
-                foreach (var dependedModuleType in Module.FindDependedModuleTypes(moduleInfo.Type))
+                foreach (var dependedModuleType in ModuleBase.FindDependedModuleTypes(moduleInfo.Type))
                 {
                     var dependedModuleInfo = _modules.FirstOrDefault(m => m.Type == dependedModuleType);
                     if (dependedModuleInfo == null)

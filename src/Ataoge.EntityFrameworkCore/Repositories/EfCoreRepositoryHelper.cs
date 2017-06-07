@@ -27,7 +27,7 @@ namespace Ataoge.EntityFrameworkCore.Repositories
                     pageInfo.RecordCount = qq.Count();
                     count = pageInfo.RecordCount;
                 }
-                qq.Skip((pageInfo.Index - 1)* pageInfo.Size).Take(pageInfo.Size);
+                qq = qq.Skip((pageInfo.Index - 1)* pageInfo.Size).Take(pageInfo.Size);
             }
             
             foreach(var metadataPath  in metaData)
@@ -38,7 +38,7 @@ namespace Ataoge.EntityFrameworkCore.Repositories
             return new QueryablePageResult<TEntity>(qq, count, entityType);
         }
 
-        public static IQueryable<TEntity> TreeQuery<TEntity, TKey>(IQueryable<TEntity> query, IEntityType entityType, Expression<Func<TEntity, bool>> startQuery, Expression<Func<TEntity, bool>> whereQuery = null, bool upSearch = false, string orderByProperty = null, int level = 0) 
+        public static IQueryable<TEntity> TreeQuery<TEntity, TKey>(string invariantName, IQueryable<TEntity> query, IEntityType entityType, Expression<Func<TEntity, bool>> startQuery, Expression<Func<TEntity, bool>> whereQuery = null, bool upSearch = false, string orderByProperty = null, int level = 0) 
             where TEntity: class, IEntity<TKey> //ITreeEntity<TKey>
             //where TKey : struct, IEquatable<TKey>
         {
@@ -52,7 +52,24 @@ namespace Ataoge.EntityFrameworkCore.Repositories
 
             string firstQuery = query.Where(startQuery).ToSql().Replace("\r\n", " ");
             string startQueryParament = startQuery.Parameters[0].Name;
-            firstQuery = firstQuery.Insert(firstQuery.IndexOf(" FROM", StringComparison.CurrentCultureIgnoreCase), ", 0 As level");
+
+            bool forNpgsql = false;
+            string orderByFieldName = null;
+            if (!string.IsNullOrEmpty(orderByProperty))
+            {
+                var orderByAnno = entityType.FindProperty(orderByProperty).FindAnnotation("Relational:ColumnName");
+                orderByFieldName = orderByAnno!=null? orderByAnno.Value.ToString() : string.Format("\"{0}\"", orderByProperty);
+                forNpgsql = invariantName == "Npgsql.EntityFrameworkCore.PostgreSQL";
+            }
+
+             if (forNpgsql)
+            {
+                firstQuery = firstQuery.Insert(firstQuery.IndexOf(" FROM", StringComparison.CurrentCultureIgnoreCase), string.Format(", 0 As level, array[\"{0}\".\"{1}\"] as sorder", startQueryParament, orderByFieldName));
+            }
+            else
+            {
+                firstQuery = firstQuery.Insert(firstQuery.IndexOf(" FROM", StringComparison.CurrentCultureIgnoreCase), ", 0 As level");
+            }
 
             string secondQuery = null;
             string thirdQuery = null;
@@ -61,7 +78,14 @@ namespace Ataoge.EntityFrameworkCore.Repositories
             {
                 secondQuery = query.ToSql().Replace("\r\n", " ");
                 thirdQuery = secondQuery;
-                secondQuery = secondQuery.Insert(secondQuery.IndexOf(" FROM", StringComparison.CurrentCultureIgnoreCase), ", mytree.level + 1");
+                if (forNpgsql)
+                {
+                    secondQuery = secondQuery.Insert(secondQuery.IndexOf(" FROM", StringComparison.CurrentCultureIgnoreCase), string.Format(", mytree.level + 1, sorder || \"{0}\".\"{1}\" as sorder",whereQueryParament, orderByFieldName));
+                }
+                else
+                {
+                    secondQuery = secondQuery.Insert(secondQuery.IndexOf(" FROM", StringComparison.CurrentCultureIgnoreCase), ", mytree.level + 1");
+                }
                 if (upSearch)
                 {
                     secondQuery += string.Format(" join mytree on \"{0}\".\"{1}\" = \"mytree\".\"{2}\" ", whereQueryParament, fieldName, parentFieldName);
@@ -83,7 +107,14 @@ namespace Ataoge.EntityFrameworkCore.Repositories
                     string toReplace = "\"" + whereQueryParament + "\"";
                     secondQuery = secondQuery.Replace(forReplace, toReplace);
                 }
-                secondQuery = secondQuery.Insert(secondQuery.IndexOf(" FROM", StringComparison.CurrentCultureIgnoreCase), ", mytree.level + 1");
+                if (forNpgsql)
+                {
+                    secondQuery = secondQuery.Insert(secondQuery.IndexOf(" FROM", StringComparison.CurrentCultureIgnoreCase), string.Format(", mytree.level + 1, sorder || \"{0}\".\"{1}\" as sorder", whereQueryParament, orderByFieldName));
+                }
+                else
+                {
+                    secondQuery = secondQuery.Insert(secondQuery.IndexOf(" FROM", StringComparison.CurrentCultureIgnoreCase), ", mytree.level + 1");
+                }
                 if (upSearch)
                 {
                     secondQuery = secondQuery.Insert(secondQuery.IndexOf(" WHERE", StringComparison.CurrentCultureIgnoreCase), string.Format(" join mytree on \"{0}\".\"{1}\" = \"mytree\".\"{2}\" ", whereQueryParament,  fieldName, parentFieldName));
@@ -100,12 +131,15 @@ namespace Ataoge.EntityFrameworkCore.Repositories
             sqlBuilder.Append(firstQuery);
             sqlBuilder.Append(" union all ");
             sqlBuilder.Append(secondQuery);
-            sqlBuilder.Append(" order by level desc");
-            if (!string.IsNullOrEmpty(orderByProperty))
+            if (!forNpgsql)
             {
-                var orderByAnno = entityType.FindProperty(orderByProperty).FindAnnotation("Relational:ColumnName");
-                string orderByFieldName = orderByAnno!=null? orderByAnno.Value.ToString() : string.Format("\"{0}\"", orderByProperty);
-                sqlBuilder.Append(string.Format(", {0}", orderByFieldName));
+                sqlBuilder.Append(" order by level desc");
+                if (!string.IsNullOrEmpty(orderByFieldName))
+                {
+                    //var orderByAnno = entityType.FindProperty(orderByProperty).FindAnnotation("Relational:ColumnName");
+                    //string orderByFieldName = orderByAnno!=null? orderByAnno.Value.ToString() : string.Format("\"{0}\"", orderByProperty);
+                    sqlBuilder.Append(string.Format(", {0}", orderByFieldName));
+                }
             }
             sqlBuilder.Append(") ");
 
@@ -120,6 +154,11 @@ namespace Ataoge.EntityFrameworkCore.Repositories
                 sqlBuilder.Append(string.Format("level = {0}", level));
             }
 
+            if (forNpgsql && !string.IsNullOrEmpty(orderByFieldName))
+            {
+                sqlBuilder.Append(" order by sorder");
+            }
+
             return query.FromSql(sqlBuilder.ToString());
         }
 
@@ -127,7 +166,6 @@ namespace Ataoge.EntityFrameworkCore.Repositories
             where TEntity: class, IEntity<TKey> //ITreeEntity<TKey>
             //where TKey : struct, IEquatable<TKey>
         {
-           
             var tableAnnn = entityType.FindAnnotation("Relational:TableName");
             string tableName = tableAnnn?.Value.ToString();
             var anno = entityType.FindProperty(nameof(ITreeEntity.Pid)).FindAnnotation("Relational:ColumnName");
@@ -135,14 +173,38 @@ namespace Ataoge.EntityFrameworkCore.Repositories
             var idAnno = entityType.FindProperty(nameof(ITreeEntity.Id)).FindAnnotation("Relational:ColumnName");
             string fieldName = idAnno != null ? idAnno.Value.ToString() : nameof(ITreeEntity<int>.Id);
 
-
             List<DbParameter> dbParameters = new List<DbParameter>();
             SqlWithParameters firstSqls = query.Where(startQuery).GetSqlTextWithParement();
             AddDbParameter(repositoryHelper, dbParameters, firstSqls);
 
+
             string firstQuery = firstSqls.Sql.Replace("\r\n", " ");
             string startQueryParament = startQuery.Parameters[0].Name;
-            firstQuery = firstQuery.Insert(firstQuery.IndexOf(" FROM", StringComparison.CurrentCultureIgnoreCase), ", 0 As level");
+
+            bool forNpgsql = false;
+            string orderByFieldName = null;
+            if (!string.IsNullOrEmpty(orderByProperty))
+            {
+                var orderByAnno = entityType.FindProperty(orderByProperty).FindAnnotation("Relational:ColumnName");
+                orderByFieldName = orderByAnno!=null? orderByAnno.Value.ToString() : string.Format("\"{0}\"", orderByProperty);
+                forNpgsql = repositoryHelper.InvariantName == "Npgsql.EntityFrameworkCore.PostgreSQL";
+            }
+
+            if (forNpgsql)
+            {
+                firstQuery = firstQuery.Insert(firstQuery.IndexOf(" FROM", StringComparison.CurrentCultureIgnoreCase), string.Format(", 0 As level, array[\"{0}\".\"{1}\"] as sorder", startQueryParament, orderByFieldName));
+            }
+            else
+            {
+                firstQuery = firstQuery.Insert(firstQuery.IndexOf(" FROM", StringComparison.CurrentCultureIgnoreCase), ", 0 As level");
+            }
+            
+            //with recursive mytree as ( 
+            //select "t"."id", "t"."createtime", "t"."creator", "t"."customdata", "t"."displayname", "t"."group", "t"."icon", "t"."isenabled", "t"."isvisible", "t"."lastmodifytime", "t"."modifier", "t"."name", "t"."pid", "t"."platsupport", "t"."requiredpermissionname", "t"."requiresauthentication", "t"."sindex", "t"."target", "t"."url", 0 as level, ARRAY[t.sindex] as sorder from "menus" as "t" where "t"."pid" is null 
+            //union all 
+            //select "tt"."id", "tt"."createtime", "tt"."creator", "tt"."customdata", "tt"."displayname", "tt"."group", "tt"."icon", "tt"."isenabled", "tt"."isvisible", "tt"."lastmodifytime", "tt"."modifier", "tt"."name", "tt"."pid", "tt"."platsupport", "tt"."requiredpermissionname", "tt"."requiresauthentication", "tt"."sindex", "tt"."target", "tt"."url", mytree.level + 1, sorder || tt.sindex as sorder from "menus" as "tt" join mytree on "tt"."pid" = "mytree"."id"  where "tt"."group" = 0 
+            //)
+            //select * from "mytree" as "t" where "t"."group" = 0 ORDER BY SORDER
 
             string secondQuery = null;
             string thirdQuery = null;
@@ -151,7 +213,14 @@ namespace Ataoge.EntityFrameworkCore.Repositories
             {
                 secondQuery = query.ToSql().Replace("\r\n", " ");
                 thirdQuery = secondQuery;
-                secondQuery = secondQuery.Insert(secondQuery.IndexOf(" FROM", StringComparison.CurrentCultureIgnoreCase), ", mytree.level + 1");
+                if (forNpgsql)
+                {
+                    secondQuery = secondQuery.Insert(secondQuery.IndexOf(" FROM", StringComparison.CurrentCultureIgnoreCase), string.Format(", mytree.level + 1, sorder || \"{0}\".\"{1}\" as sorder",whereQueryParament, orderByFieldName));
+                }
+                else
+                {
+                    secondQuery = secondQuery.Insert(secondQuery.IndexOf(" FROM", StringComparison.CurrentCultureIgnoreCase), ", mytree.level + 1");
+                }
                 if (upSearch)
                 {
                     secondQuery += string.Format(" join mytree on \"{0}\".\"{1}\" = \"mytree\".\"{2}\" ", whereQueryParament, fieldName, parentFieldName);
@@ -176,7 +245,14 @@ namespace Ataoge.EntityFrameworkCore.Repositories
                     string toReplace = "\"" + whereQueryParament + "\"";
                     secondQuery = secondQuery.Replace(forReplace, toReplace);
                 }
-                secondQuery = secondQuery.Insert(secondQuery.IndexOf(" FROM", StringComparison.CurrentCultureIgnoreCase), ", mytree.level + 1");
+                if (forNpgsql)
+                {
+                    secondQuery = secondQuery.Insert(secondQuery.IndexOf(" FROM", StringComparison.CurrentCultureIgnoreCase), string.Format(", mytree.level + 1, sorder || \"{0}\".\"{1}\" as sorder", whereQueryParament, orderByFieldName));
+                }
+                else
+                {
+                    secondQuery = secondQuery.Insert(secondQuery.IndexOf(" FROM", StringComparison.CurrentCultureIgnoreCase), ", mytree.level + 1");
+                }
                 if (upSearch)
                 {
                     secondQuery = secondQuery.Insert(secondQuery.IndexOf(" WHERE", StringComparison.CurrentCultureIgnoreCase), string.Format(" join mytree on \"{0}\".\"{1}\" = \"mytree\".\"{2}\" ", whereQueryParament,  fieldName, parentFieldName));
@@ -193,12 +269,15 @@ namespace Ataoge.EntityFrameworkCore.Repositories
             sqlBuilder.Append(firstQuery);
             sqlBuilder.Append(" union all ");
             sqlBuilder.Append(secondQuery);
-            sqlBuilder.Append(" order by level desc");
-            if (!string.IsNullOrEmpty(orderByProperty))
+            if (!forNpgsql)
             {
-                var orderByAnno = entityType.FindProperty(orderByProperty).FindAnnotation("Relational:ColumnName");
-                string orderByFieldName = orderByAnno!=null? orderByAnno.Value.ToString() : string.Format("\"{0}\"", orderByProperty);
-                sqlBuilder.Append(string.Format(", {0}", orderByFieldName));
+                sqlBuilder.Append(" order by level desc");
+                if (!string.IsNullOrEmpty(orderByFieldName))
+                {
+                    //var orderByAnno = entityType.FindProperty(orderByProperty).FindAnnotation("Relational:ColumnName");
+                    //string orderByFieldName = orderByAnno!=null? orderByAnno.Value.ToString() : string.Format("\"{0}\"", orderByProperty);
+                    sqlBuilder.Append(string.Format(", {0}", orderByFieldName));
+                }
             }
             sqlBuilder.Append(") ");
 
@@ -212,6 +291,11 @@ namespace Ataoge.EntityFrameworkCore.Repositories
                     sqlBuilder.Append(" and ");
                 sqlBuilder.Append(string.Format("level = {0}", repositoryHelper.CreateParameterName("level")));
                 AddDbParameter(repositoryHelper, dbParameters, "level", level);
+            }
+
+            if (forNpgsql && !string.IsNullOrEmpty(orderByFieldName))
+            {
+                sqlBuilder.Append(" order by sorder");
             }
 
             //外部where

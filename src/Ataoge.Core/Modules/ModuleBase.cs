@@ -5,13 +5,14 @@ using System.Linq;
 using System.Reflection;
 using Ataoge.Collections.Extensions;
 using Ataoge.Configuration;
+using Ataoge.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Ataoge.Modules
 {
-    public abstract class Module : IModule
+    public abstract class ModuleBase : IModule
     {
-        protected Module()
+        protected ModuleBase()
         {
             
         }
@@ -20,12 +21,22 @@ namespace Ataoge.Modules
 
         public IModuleManager ModuleManager {get; internal set;}
 
-        public void ConfigureService(IServiceCollection services)
+        public void ConfiguringService(IServiceCollection services)
         {
-            OnConfigureService(services);
+            OnConfiguringService(services);
         }
 
-        protected virtual void OnConfigureService(IServiceCollection services)
+        protected virtual void OnConfiguringService(IServiceCollection services)
+        {
+
+        }
+
+        public void ConfiguredService(IServiceCollection services)
+        {
+            OnConfiguredService(services);
+        }
+
+        protected virtual void OnConfiguredService(IServiceCollection services)
         {
 
         }
@@ -45,10 +56,15 @@ namespace Ataoge.Modules
 
         }
 
+        protected virtual TExtension GetOrCreateExtension<TExtension>()  where TExtension : class, ISkeletonOptionsExtension, new()
+        {
+            return this.ModuleManager.SkeletonOptions.FindExtension<TExtension>() ?? new TExtension();
+        }
+
         /// <summary>
         /// Gets the assembly in which the concrete module type is located. To avoid bugs whereby deriving from a module will
         /// change the target assembly, this property can only be used by modules that inherit directly from
-        /// <see cref="Module"/>.
+        /// <see cref="ModuleBase"/>.
         /// </summary>
         protected virtual Assembly ThisAssembly
         {
@@ -56,7 +72,7 @@ namespace Ataoge.Modules
             {
                 var thisType = GetType();
                 var baseType = thisType.GetTypeInfo().BaseType;
-                if (baseType != typeof(Module))
+                if (baseType != typeof(ModuleBase))
                     throw new InvalidOperationException(string.Format("{0} Assembly for {1} Unavailable", thisType, baseType));
 
                 return thisType.GetTypeInfo().Assembly;
@@ -74,7 +90,7 @@ namespace Ataoge.Modules
                 typeInfo.IsClass &&
                 !typeInfo.IsAbstract &&
                 !typeInfo.IsGenericType &&
-                typeof(Module).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo());
+                typeof(ModuleBase).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo());
         }
 
         /// <summary>

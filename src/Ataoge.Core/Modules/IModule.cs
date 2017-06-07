@@ -7,7 +7,9 @@ namespace Ataoge.Modules
     {
         IModuleManager ModuleManager {get;}
         
-        void ConfigureService(IServiceCollection services);
+        void ConfiguringService(IServiceCollection services);
+        
+        void ConfiguredService(IServiceCollection services);
 
         void Initialize(IServiceProvider serviceProvider);
 

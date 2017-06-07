@@ -1,12 +1,13 @@
 using System.Collections.Generic;
 using Ataoge.Collections.Extensions;
+using Ataoge.Data;
 
 namespace Ataoge.Application.Navigation
 {
     /// <summary>
     /// Represents an item in a <see cref="MenuDefinition"/>.
     /// </summary>
-    public class MenuItemDefinition : IHasMenuItemDefinitions
+    public class MenuItemDefinition : IHasMenuItemDefinitions, IHasUrl
     {
         /// <summary>
         /// Unique name of the menu item in the application. 

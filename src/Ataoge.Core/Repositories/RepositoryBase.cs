@@ -60,6 +60,16 @@ namespace Ataoge.Repositories
             return GetAll().Single(predicate);
         }
 
+         public virtual TEntity SingleOrDefault(Expression<Func<TEntity, bool>> predicate)
+        {
+            return GetAll().SingleOrDefault(predicate);
+        }
+
+        public virtual Task<TEntity> SingleOrDefaultAsync(Expression<Func<TEntity, bool>> predicate)
+        {
+            return Task.FromResult(SingleOrDefault(predicate));
+        }
+
         public virtual Task<TEntity> SingleAsync(Expression<Func<TEntity, bool>> predicate)
         {
             return Task.FromResult(Single(predicate));
@@ -116,7 +126,8 @@ namespace Ataoge.Repositories
 
         public virtual async Task DeleteAsync(Expression<Func<TEntity, bool>> predicate)
         {
-            Delete(predicate);
+             Delete(predicate);
+             await Task.CompletedTask;
         }
 
     }

@@ -1,7 +1,7 @@
 using Ataoge.Application.Navigation;
 using Ataoge.Collections;
 
-namespace Ataoge.Configuration
+namespace Ataoge.Infrastructure
 {
     /// <summary>
     /// Used to configure navigation.

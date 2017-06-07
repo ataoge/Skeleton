@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Ataoge.AspNetCore;
 using Ataoge.Collections.Extensions;
 using Ataoge.Dependency;
 using Ataoge.Runtime.Session;
@@ -21,7 +22,8 @@ namespace Ataoge.Application.Navigation
 
         public UserNavigationManager(
             INavigationManager navigationManager,
-            ISafSession<TKey> SafSession)
+            ISafSession<TKey> SafSession,
+            IUrlHelper urlHelper)
             //ILocalizationContext localizationContext,
             //IIocResolver iocResolver)
         {
@@ -30,7 +32,10 @@ namespace Ataoge.Application.Navigation
             //_iocResolver = iocResolver;
             //PermissionChecker = NullPermissionChecker.Instance;
             SafSession = this.SafSession; //NullAbpSession.Instance;
+            _urlHelper = urlHelper;
         }
+
+        private readonly IUrlHelper _urlHelper; 
 
         public async Task<UserMenu> GetMenuAsync(string menuName, UserIdentifier<TKey> user)
         {
@@ -87,6 +92,7 @@ namespace Ataoge.Application.Navigation
                     //}
 
                     var userMenuItem = new UserMenuItem(menuItemDefinition); //, _localizationContext);
+                    userMenuItem.Url = _urlHelper.GenerateNormalUrl(userMenuItem.Url); //换成绝对Url
                     if (menuItemDefinition.IsLeaf || (await FillUserMenuItems(user, menuItemDefinition.Items, userMenuItem.Items)) > 0)
                     {
                         userMenuItems.Add(userMenuItem);

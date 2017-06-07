@@ -2,34 +2,34 @@ using System;
 
 namespace Ataoge.Data.Entities
 {
-    [DbTableAttribute("SEQUENCESRULE")]
+    [DbTableAttribute("SequencesRule")]
     public class SequencesRule
     {
-        [DbFieldAttribute("PATTERNAME", IsPrimaryKey = true)]
+        [DbFieldAttribute("PatternName", IsPrimaryKey = true)]
         public string PatternName {get; set;}
 
-        [DbFieldAttribute("MINVALUE")]
+        [DbFieldAttribute("MinValue")]
         public int MinValue {get; set;} = 1;
 
-        [DbFieldAttribute("MAXVALUE")]
+        [DbFieldAttribute("MaxValue")]
         public int MaxValue {get; set;} = int.MaxValue;
 
-        [DbFieldAttribute("NEXTVALUE")]
+        [DbFieldAttribute("NextValue")]
         public int NextValue {get; set;} = 2;
 
-        [DbFieldAttribute("CONTINUUM")]
+        [DbFieldAttribute("Continuum")]
         public bool Continuum {get; set;} = false;
 
-        [DbFieldAttribute("PRESERVEDCOUNT")]
+        [DbFieldAttribute("PreservedCount")]
         public int PreservedCount {get; set;} = 0;
 
-        [DbFieldAttribute("TABLEFIELD")]
+        [DbFieldAttribute("TableField")]
         public string TableField {get; set;}
 
-        [DbFieldAttribute("STEP")]
+        [DbFieldAttribute("Step")]
         public int Step {get; set;} = 1;
 
-        [DbFieldAttribute("UPDATETIME")]
+        [DbFieldAttribute("UpdateTime")]
         public DateTime UpdateTime {get; set;}
 
     }

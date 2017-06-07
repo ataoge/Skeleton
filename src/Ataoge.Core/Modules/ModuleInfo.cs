@@ -23,7 +23,7 @@ namespace Ataoge.Modules
         /// <summary>
         /// Instance of the module.
         /// </summary>
-        public Module Instance { get; }
+        public ModuleBase Instance { get; }
 
         /// <summary>
         /// Is this module loaded as a plugin.
@@ -38,7 +38,7 @@ namespace Ataoge.Modules
         /// <summary>
         /// Creates a new AbpModuleInfo object.
         /// </summary>
-        public ModuleInfo([NotNull] Type type, [NotNull] Module instance, bool isLoadedAsPlugIn)
+        public ModuleInfo([NotNull] Type type, [NotNull] ModuleBase instance, bool isLoadedAsPlugIn)
         {
             Check.NotNull(type, nameof(type));
             Check.NotNull(instance, nameof(instance));

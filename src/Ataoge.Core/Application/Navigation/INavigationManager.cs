@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Ataoge.Application.Navigation
@@ -17,5 +18,7 @@ namespace Ataoge.Application.Navigation
         /// A shortcut of <see cref="Menus"/>["MainMenu"].
         /// </summary>
         MenuDefinition MainMenu { get; }
+
+        void Initialize(IServiceProvider serviceProvider);
     }
 }

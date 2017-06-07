@@ -29,20 +29,20 @@ namespace Ataoge.EntityFrameworkCore.Repositories
             if (recursion)
             {
                 var entityType = Context.Model.FindEntityType(typeof(TEntity).FullName);
-                return EfCoreRepositoryHelper.TreeQuery<TEntity, string>(Table, entityType, ts => ts.Id.Equals(id), where, false, orderBySilbing);
+                return EfCoreRepositoryHelper.TreeQuery<TEntity, string>(_repositoryHelper.InvariantName, Table, entityType, ts => ts.Id.Equals(id), where, false, orderBySilbing);
             }
             
             IQueryable<TEntity> result = Table;
             if (where != null)
                 result = result.Where(where);
-            return result.Where(EfCoreRepositoryHelper.BuildEqualsPredicate<TEntity>(nameof(ITreeEntity.Pid), id));
+            return result.Where(t => t.Pid ==id);
            
         }
 
         public IQueryable<TEntity> GetSiblings(string id, string orderBySilbing = null)
         {
             TEntity theEntity = Get(id); 
-            return Table.Where(EfCoreRepositoryHelper.BuildEqualsPredicate<TEntity>(nameof(ITreeEntity.Pid), theEntity.Pid));//t => t.Pid == theEntity.Pid);
+            return Table.Where(t=> t.Pid == theEntity.Pid);
             // 构造表达式；
         }
 
@@ -50,7 +50,7 @@ namespace Ataoge.EntityFrameworkCore.Repositories
         {
             
             var entityType = Context.Model.FindEntityType(typeof(TEntity).FullName);
-            return  EfCoreRepositoryHelper.TreeQuery<TEntity,string>(Table, entityType, t => t.Pid == null, where, false);
+            return  EfCoreRepositoryHelper.TreeQuery<TEntity,string>(_repositoryHelper.InvariantName, Table, entityType, t => t.Pid == null, where, false);
         }
 
         public List<TEntity> GetParentList(string id)
@@ -63,8 +63,8 @@ namespace Ataoge.EntityFrameworkCore.Repositories
             var entityType = Context.Model.FindEntityType(typeof(TEntity).FullName);
             if (_repositoryHelper != null)
                 return EfCoreRepositoryHelper.TreeQuery<TEntity,string>(_repositoryHelper, Table, entityType, t => t.Id.Equals(id), null, true);
-            return EfCoreRepositoryHelper.TreeQuery<TEntity,string>(Table, entityType, t => t.Id.Equals(id), null, true);
+            return EfCoreRepositoryHelper.TreeQuery<TEntity,string>(_repositoryHelper.InvariantName, Table, entityType, t => t.Id.Equals(id), null, true);
         }
     }
-    }
+    
 }

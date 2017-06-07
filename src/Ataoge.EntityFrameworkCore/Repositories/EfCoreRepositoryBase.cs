@@ -95,6 +95,11 @@ namespace Ataoge.EntityFrameworkCore.Repositories
             return await GetAll().SingleAsync(predicate);
         }
 
+        public override async Task<TEntity> SingleOrDefaultAsync(Expression<Func<TEntity, bool>> predicate)
+        {
+            return await GetAll().SingleOrDefaultAsync(predicate);
+        }
+
         
         public override async Task<TEntity> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate)
         {

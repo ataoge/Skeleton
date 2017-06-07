@@ -1,4 +1,4 @@
-namespace Abp.MultiTenancy
+namespace Ataoge.MultiTenancy
 {
     public static class MultiTenancyConsts
     {
@@ -7,6 +7,6 @@ namespace Abp.MultiTenancy
         /// </summary>
         public const int DefaultTenantId = 1;
 
-        //public const string TenantIdResolveKey = "Ataoge.TenantId";
+        public const string TenantIdResolveKey = "Ataoge.TenantId";
     }
 }

@@ -1,11 +1,15 @@
 using System;
 using System.Collections.Generic;
+using Ataoge.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Ataoge.Modules
 {
     public interface IModuleManager
     {
+    
+        SkeletonOptions SkeletonOptions {get;}
+
         ModuleInfo StartupModule { get; }
 
         IReadOnlyList<ModuleInfo> Modules { get; }
