@@ -71,14 +71,33 @@ namespace Ataoge.EntityFrameworkCore.Repositories
             return await GetAll().ToListAsync();
         }
 
+        public override IEnumerable<TEntity> GetListFromRawSQL(string sql, params object[] parameters)
+        {
+             return this.Context.Database.GetModelFromQuery(()=> CreateNew() , sql, parameters);
+            
+        }
+
+        protected virtual TEntity CreateNew()
+        {
+            return Activator.CreateInstance<TEntity>();
+        }
+
         public override async Task<TEntity> SingleAsync(Expression<Func<TEntity, bool>> predicate)
         {
             return await GetAll().SingleAsync(predicate);
         }
 
-        public override async Task<TEntity> SingleOrDefaultAsync(Expression<Func<TEntity, bool>> predicate)
+        public override async Task<TEntity> SingleOrDefaultAsync(Expression<Func<TEntity, bool>> predicate, params Expression<Func<TEntity, object>>[] propertySelectors)
         {
-            return await GetAll().SingleOrDefaultAsync(predicate);
+            var query = GetAll();
+            if (!propertySelectors.IsNullOrEmpty())
+            {
+                foreach (var propertySelector in propertySelectors)
+                {
+                    query = query.Include(propertySelector);
+                }
+            }
+            return await query.SingleOrDefaultAsync(predicate);
         }
 
         public override async Task<TEntity> FirstOrDefaultAsync(TPrimaryKey id)
@@ -223,5 +242,11 @@ namespace Ataoge.EntityFrameworkCore.Repositories
             return entry?.Entity as TEntity;
         }
 
+        public override IPageResult<TEntity> GetSome(IPageInfo pageInfo, Expression<Func<TEntity, bool>> predicate, Func<IQueryable<TEntity>, IQueryable<TEntity>> queryFunc, params string[] metaData)
+        {
+            throw new NotImplementedException();
+        }
+
+        
     }
 }

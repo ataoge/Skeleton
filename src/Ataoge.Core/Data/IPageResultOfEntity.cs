@@ -7,5 +7,6 @@ namespace Ataoge.Data
         TMetadata GetOneMetadata<TMetadata>(TEntity entity, string metadataName);
         IList<TMetadata> GetManyMetadata<TMetadata>(TEntity entity, string metadataName);
         int RecordCount {get; }
+        int? FilteredRecord {get;}
     }
 }

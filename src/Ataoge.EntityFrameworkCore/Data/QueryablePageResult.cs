@@ -10,18 +10,21 @@ namespace Ataoge.Data
 {
     class QueryablePageResult<TEntity> : IPageResult<TEntity>
     {
-        public QueryablePageResult(IQueryable<TEntity> queryable, int count,  IEntityType builder)
+        public QueryablePageResult(IQueryable<TEntity> queryable, int count,  IEntityType builder, int? filteredRecord = null)
         {
             _innerValue = queryable;
             _builder = builder;
 
             RecordCount = count;
+            FilteredRecord = filteredRecord;
         }
 
         private readonly IEntityType _builder;
         private IQueryable<TEntity> _innerValue;
 
         public int RecordCount {get;}
+
+        public int? FilteredRecord {get;}
 
         public IEnumerator<TEntity> GetEnumerator()
         {

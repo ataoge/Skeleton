@@ -31,6 +31,8 @@ namespace Ataoge.Repositories
 
         public abstract IPageResult<TEntity> GetSome(Func<IQueryable<TEntity>, IQueryable<TEntity>> queryFunc, IPageInfo pageInfo, params string [] metaData);
 
+        public abstract IPageResult<TEntity> GetSome(IPageInfo pageInfo, Expression<Func<TEntity, bool>> predicate, Func<IQueryable<TEntity>, IQueryable<TEntity>> queryFunc,  params string [] metaData);
+
         public abstract IQueryable<TEntity> GetAll();
 
         public virtual IQueryable<TEntity> GetAllIncluding(params Expression<Func<TEntity, object>>[] propertySelectors)
@@ -48,6 +50,8 @@ namespace Ataoge.Repositories
             return Task.FromResult(GetAllList());
         }
 
+        public abstract IEnumerable<TEntity> GetListFromRawSQL(string sql, params object[] parameters);
+
         public virtual T Query<T>(Func<IQueryable<TEntity>, T> queryMethod)
         {
             return queryMethod(GetAll());
@@ -60,14 +64,14 @@ namespace Ataoge.Repositories
             return GetAll().Single(predicate);
         }
 
-         public virtual TEntity SingleOrDefault(Expression<Func<TEntity, bool>> predicate)
+        public virtual TEntity SingleOrDefault(Expression<Func<TEntity, bool>> predicate, params Expression<Func<TEntity, object>>[] propertySelectors)
         {
             return GetAll().SingleOrDefault(predicate);
         }
 
-        public virtual Task<TEntity> SingleOrDefaultAsync(Expression<Func<TEntity, bool>> predicate)
+        public virtual Task<TEntity> SingleOrDefaultAsync(Expression<Func<TEntity, bool>> predicate, params Expression<Func<TEntity, object>>[] propertySelectors)
         {
-            return Task.FromResult(SingleOrDefault(predicate));
+            return Task.FromResult(SingleOrDefault(predicate, propertySelectors));
         }
 
         public virtual Task<TEntity> SingleAsync(Expression<Func<TEntity, bool>> predicate)

@@ -86,9 +86,11 @@ namespace Ataoge.AspNetCore
             }
         } 
 
-        private string GeBaseUrl()
+        private string GeBaseUrl(bool withPath = false)
         {
             var request = _httpContextAccessor.HttpContext.Request;
+            if (withPath)
+                return string.Format("{0}://{1}{2}{3}", request.Scheme, request.Host, request.PathBase.Value, request.Path);
             return string.Format("{0}://{1}{2}", request.Scheme, request.Host, request.PathBase.Value);
             
         }

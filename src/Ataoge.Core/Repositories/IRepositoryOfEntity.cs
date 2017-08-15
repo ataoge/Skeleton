@@ -14,6 +14,8 @@ namespace Ataoge.Repositories
 
         IPageResult<TEntity> GetSome(Func<IQueryable<TEntity>, IQueryable<TEntity>> queryFunc, IPageInfo pageInfo, params string [] metaData);
 
+        IPageResult<TEntity> GetSome(IPageInfo pageInfo, Expression<Func<TEntity, bool>> predicate, Func<IQueryable<TEntity>, IQueryable<TEntity>> queryFunc,  params string [] metaData);
+
         IQueryable<TEntity> GetAll();
 
         /// <summary>
@@ -25,6 +27,8 @@ namespace Ataoge.Repositories
 
         Task<List<TEntity>> GetAllListAsync();
 
+        IEnumerable<TEntity> GetListFromRawSQL(string sql, params object[] parameters);
+        
          /// <summary>
         /// 对IQuery的结果做进一步操作，如ToList， FirstOrDefault等
         /// </summary>
@@ -37,9 +41,9 @@ namespace Ataoge.Repositories
         /// </summary>
         TEntity Single(Expression<Func<TEntity, bool>> predicate);
 
-        TEntity SingleOrDefault(Expression<Func<TEntity, bool>> predicate);
+        TEntity SingleOrDefault(Expression<Func<TEntity, bool>> predicate, params Expression<Func<TEntity, object>>[] propertySelectors);
 
-        Task<TEntity> SingleOrDefaultAsync(Expression<Func<TEntity, bool>> predicate);
+        Task<TEntity> SingleOrDefaultAsync(Expression<Func<TEntity, bool>> predicate, params Expression<Func<TEntity, object>>[] propertySelectors);
 
         Task<TEntity> SingleAsync(Expression<Func<TEntity, bool>> predicate);
 

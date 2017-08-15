@@ -38,6 +38,41 @@ namespace Ataoge.EntityFrameworkCore.Repositories
             return new QueryablePageResult<TEntity>(qq, count, entityType);
         }
 
+        public static IPageResult<TEntity> GetSome<TEntity>(IQueryable<TEntity> table, IEntityType entityType, IPageInfo pageInfo, Expression<Func<TEntity, bool>> predicate, Func<IQueryable<TEntity>, IQueryable<TEntity>> queryFunc,  params string [] metaData)
+            where TEntity : class, IEntity
+        {
+            IQueryable<TEntity> qq = table; 
+            qq.Where(predicate);
+            int count = 0;
+            if (pageInfo!= null && pageInfo.Index > 0)
+            {
+                if (pageInfo.ReturnRecordCount) 
+                {
+                    pageInfo.RecordCount = qq.Count();
+                    count = pageInfo.RecordCount;
+                }
+            }
+
+            int? filteredRecord = null;
+            if (queryFunc != null)
+            {
+                qq = queryFunc(qq);
+                filteredRecord = qq.Count();
+            }
+            
+            if (pageInfo!= null && pageInfo.Index > 0)
+            {
+                qq = qq.Skip((pageInfo.Index - 1)* pageInfo.Size).Take(pageInfo.Size);
+            }
+
+            foreach(var metadataPath  in metaData)
+            {
+                qq = qq.Include(metadataPath);
+            }
+
+            return new QueryablePageResult<TEntity>(qq, count, entityType, filteredRecord);
+        }
+
         public static IQueryable<TEntity> TreeQuery<TEntity, TKey>(string invariantName, IQueryable<TEntity> query, IEntityType entityType, Expression<Func<TEntity, bool>> startQuery, Expression<Func<TEntity, bool>> whereQuery = null, bool upSearch = false, string orderByProperty = null, int level = 0) 
             where TEntity: class, IEntity<TKey> //ITreeEntity<TKey>
             //where TKey : struct, IEquatable<TKey>

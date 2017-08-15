@@ -103,8 +103,8 @@ namespace Ataoge.Services
 
         public override string[] GetStringArrayParam(string name)
         {
-            if (_httpContextAccessor.HttpContext.Request.Form.ContainsKey(name))
-                return _httpContextAccessor.HttpContext.Request.Form[name].ToArray();
+            if (_httpContextAccessor.HttpContext.Request.Query.ContainsKey(name))
+                return _httpContextAccessor.HttpContext.Request.Query[name].ToArray();
             return null;
         }
 

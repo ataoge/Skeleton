@@ -49,7 +49,7 @@ namespace Ataoge.Core.Tests
         public void TestStartupConfiguration()
         {
             IServiceCollection services = new ServiceCollection();
-            IModuleManager modulManager = new ModuleManager();
+            IModuleManager modulManager = new ModuleManager(new SkeletonOptions());
             modulManager.Initialize(typeof(AutoMapper.AtaogeAutoMapperModule));
             modulManager.ConfigModules(services);
             services.AddSingleton<IModuleManager>(modulManager);
