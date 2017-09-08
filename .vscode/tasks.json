@@ -13,6 +13,14 @@
             "isBuildCommand": true,
             "showOutput": "silent",
             "problemMatcher": "$msCompile"
+        },
+        {
+            "taskName": "buildEftest",
+            "args": ["build", "${workspaceRoot}/tests/Ataoge.EntityFrameworkCore.Tests/Ataoge.EntityFrameworkCore.Tests.csproj" ],
+            "suppressTaskName": true,
+            "isBuildCommand": true,
+            "showOutput": "silent",
+            "problemMatcher": "$msCompile"
         }
     ]
 }

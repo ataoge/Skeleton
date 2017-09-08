@@ -14,6 +14,10 @@ namespace System.Linq
 {
     public static class AtaogeQueryableExtensions
     {
+        static AtaogeQueryableExtensions()
+        {
+            
+        }
         private static readonly TypeInfo QueryCompilerTypeInfo = typeof(QueryCompiler).GetTypeInfo();
 
         private static readonly FieldInfo QueryCompilerField = typeof(EntityQueryProvider).GetTypeInfo().DeclaredFields.First(x => x.Name == "_queryCompiler");
@@ -29,7 +33,8 @@ namespace System.Linq
 
         private static readonly FieldInfo DataBaseField = QueryCompilerTypeInfo.DeclaredFields.Single(x => x.Name == "_database");
 
-        private static readonly FieldInfo QueryCompilationContextFactoryField = typeof(Database).GetTypeInfo().DeclaredFields.Single(x => x.Name == "_queryCompilationContextFactory");
+        private static readonly PropertyInfo Dependencies = typeof(Database).GetTypeInfo().DeclaredProperties.Single(x => x.Name == "Dependencies");
+        //private static readonly FieldInfo QueryCompilationContextFactoryField = typeof(Database).GetTypeInfo().DeclaredFields.Single(x => x.Name == "_queryCompilationContextFactory");
 
         public static string ToSql<TEntity>(this IQueryable<TEntity> query, bool useParameters = false) where TEntity : class
         {
@@ -44,15 +49,17 @@ namespace System.Linq
             {
                 throw new ArgumentException("Invalid query");
             }
-
-            var queryCompiler = (IQueryCompiler)QueryCompilerField.GetValue(query.Provider);
+            
+          
+          
+            var queryCompiler = (IQueryCompiler)QueryCompilerField.GetValue(query.Provider); //(IQueryCompiler)
 
             Expression expression = query.Expression;
             if (useParameters)  //采用参数模式替换
             {
                 var queryContextFactory=(IQueryContextFactory)QueryContextFactoryField.GetValue(queryCompiler);
                 var queryContext = queryContextFactory.Create();
-                expression = (Expression) ExtractParametersMethod.Invoke(queryCompiler, new object[] {query.Expression, queryContext});
+                expression = (Expression) ExtractParametersMethod.Invoke(queryCompiler, new object[] {query.Expression, queryContext, true});
             }
 
             var nodeTypeProvider = (INodeTypeProvider)NodeTypeProviderField.GetValue(queryCompiler);
@@ -60,7 +67,8 @@ namespace System.Linq
             
             var queryModel = parser.GetParsedQuery(expression);//query.Expression);
             var database = DataBaseField.GetValue(queryCompiler);
-            var queryCompilationContextFactory = (IQueryCompilationContextFactory)QueryCompilationContextFactoryField.GetValue(database);
+            var dp = (DatabaseDependencies)Dependencies.GetValue(database);
+            var queryCompilationContextFactory = dp.QueryCompilationContextFactory;// (IQueryCompilationContextFactory)QueryCompilationContextFactoryField.GetValue(database);
             var queryCompilationContext = queryCompilationContextFactory.Create(false);
             var modelVisitor = (RelationalQueryModelVisitor)queryCompilationContext.CreateQueryModelVisitor();
             modelVisitor.CreateQueryExecutor<TEntity>(queryModel);
@@ -79,13 +87,14 @@ namespace System.Linq
 
             var queryContextFactory=(IQueryContextFactory)QueryContextFactoryField.GetValue(queryCompiler);
             var queryContext = queryContextFactory.Create();
-            Expression expression = (Expression) ExtractParametersMethod.Invoke(queryCompiler, new object[] {query.Expression, queryContext});
+            Expression expression = (Expression) ExtractParametersMethod.Invoke(queryCompiler, new object[] {query.Expression, queryContext, true});
            
             var nodeTypeProvider = (INodeTypeProvider)NodeTypeProviderField.GetValue(queryCompiler);
             var parser = (IQueryParser)CreateQueryParserMethod.Invoke(queryCompiler, new object[] { nodeTypeProvider });
             var queryModel = parser.GetParsedQuery(expression);
             var database = DataBaseField.GetValue(queryCompiler);
-            var queryCompilationContextFactory = (IQueryCompilationContextFactory)QueryCompilationContextFactoryField.GetValue(database);
+            var dp = (DatabaseDependencies)Dependencies.GetValue(database);
+            var queryCompilationContextFactory = dp.QueryCompilationContextFactory;// (IQueryCompilationContextFactory)QueryCompilationContextFactoryField.GetValue(database);
             var queryCompilationContext = queryCompilationContextFactory.Create(false);
             var modelVisitor = (RelationalQueryModelVisitor)queryCompilationContext.CreateQueryModelVisitor();
             modelVisitor.CreateQueryExecutor<TEntity>(queryModel);

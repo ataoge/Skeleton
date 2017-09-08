@@ -1,3 +1,5 @@
+using System;
+
 namespace Ataoge.ObjectMapping
 {
     /// <summary>
@@ -10,7 +12,7 @@ namespace Ataoge.ObjectMapping
         /// </summary>
         /// <typeparam name="TDestination">Type of the destination object</typeparam>
         /// <param name="source">Source object</param>
-        TDestination Map<TDestination>(object source);
+        TDestination Map<TDestination>(object source, Action<IMapperContext> operationAction = null);
 
         /// <summary>
         /// Execute a mapping from the source object to the existing destination object
@@ -20,6 +22,6 @@ namespace Ataoge.ObjectMapping
         /// <param name="source">Source object</param>
         /// <param name="destination">Destination object</param>
         /// <returns>Returns the same <see cref="destination"/> object after mapping operation</returns>
-        TDestination Map<TSource, TDestination>(TSource source, TDestination destination);
+        TDestination Map<TSource, TDestination>(TSource source, TDestination destination, Action<IMapperContext> operationAction = null);
     }
 }

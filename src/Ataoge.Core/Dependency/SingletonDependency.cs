@@ -16,7 +16,7 @@ namespace Ataoge.Dependency
         /// The instance.
         /// </value>
         public static T Instance => LazyInstance.Value;
-        private static readonly Lazy<T> LazyInstance;
+        private static readonly Lazy<T> LazyInstance = null;
 
         static SingletonDependency()
         {

@@ -1,18 +1,17 @@
+using Ataoge.AspNetCore;
 using Ataoge.Data;
 using Microsoft.Extensions.Logging;
 
 namespace Ataoge.Services
 {
-    public interface IServiceContext
+    public interface IServiceContext : IUserAgentAccessor
     {
         
         IPageInfo PageInfo { get;}
 
         ILogger Logger {get;}
 
-        string BrowserInfo { get;}
-
-        string ClientIpAddress { get;}
+         string ClientIpAddress { get;}
         
         string GetStringParam(string name, string defaultValue = null);
 

@@ -4,6 +4,11 @@ namespace Ataoge.EntityFrameworkCore.Tests
 {
     public class TestDbContext  : AtaogeDbContext
     {
+        public TestDbContext(DbContextOptions<TestDbContext> options) : base (options)
+        {
+
+        }
+
         public TestDbContext()
         {
 
@@ -11,12 +16,19 @@ namespace Ataoge.EntityFrameworkCore.Tests
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlite("Data Source=test.db");
+            if (!optionsBuilder.IsConfigured)
+                optionsBuilder.UseSqlite("Data Source=test.db");
         }
 
          protected override void OnModelCreating(ModelBuilder modelBuilder)
          {
+            
              base.OnModelCreating(modelBuilder);
          }
+    }
+
+    public class Test
+    {
+        public int Id {get; set;}
     }
 }

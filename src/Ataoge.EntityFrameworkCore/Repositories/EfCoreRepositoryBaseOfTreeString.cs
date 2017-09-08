@@ -29,7 +29,7 @@ namespace Ataoge.EntityFrameworkCore.Repositories
             if (recursion)
             {
                 var entityType = Context.Model.FindEntityType(typeof(TEntity).FullName);
-                return EfCoreRepositoryHelper.TreeQuery<TEntity, string>(_repositoryHelper.InvariantName, Table, entityType, ts => ts.Id.Equals(id), where, false, orderBySilbing);
+                return EfCoreRepositoryHelper.TreeQuery<TEntity, string>(_repositoryHelper.ProviderName, Table, entityType, ts => ts.Id.Equals(id), where, false, orderBySilbing);
             }
             
             IQueryable<TEntity> result = Table;
@@ -50,7 +50,7 @@ namespace Ataoge.EntityFrameworkCore.Repositories
         {
             
             var entityType = Context.Model.FindEntityType(typeof(TEntity).FullName);
-            return  EfCoreRepositoryHelper.TreeQuery<TEntity,string>(_repositoryHelper.InvariantName, Table, entityType, t => t.Pid == null, where, false);
+            return  EfCoreRepositoryHelper.TreeQuery<TEntity,string>(_repositoryHelper.ProviderName, Table, entityType, t => t.Pid == null, where, false);
         }
 
         public List<TEntity> GetParentList(string id)
@@ -63,7 +63,7 @@ namespace Ataoge.EntityFrameworkCore.Repositories
             var entityType = Context.Model.FindEntityType(typeof(TEntity).FullName);
             if (_repositoryHelper != null)
                 return EfCoreRepositoryHelper.TreeQuery<TEntity,string>(_repositoryHelper, Table, entityType, t => t.Id.Equals(id), null, true);
-            return EfCoreRepositoryHelper.TreeQuery<TEntity,string>(_repositoryHelper.InvariantName, Table, entityType, t => t.Id.Equals(id), null, true);
+            return EfCoreRepositoryHelper.TreeQuery<TEntity,string>(_repositoryHelper.ProviderName, Table, entityType, t => t.Id.Equals(id), null, true);
         }
     }
     

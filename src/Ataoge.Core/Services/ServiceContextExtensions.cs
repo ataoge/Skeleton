@@ -1,10 +1,11 @@
 using System.Linq;
+using Ataoge.AspNetCore;
 
 namespace Ataoge.Services
 {
     public static class ServiceContextExtensions
     {
-        public static bool IsMobileDevice(this IServiceContext sc)
+        public static bool IsMobileDevice(this IUserAgentAccessor sc)
         {
             var agent = sc.BrowserInfo;
             if (agent != null && _mobileKeywords.Any(keyword => agent.Contains(keyword)))
@@ -12,31 +13,6 @@ namespace Ataoge.Services
             return false;
         }
 
-        public static bool IsAndroid(this IServiceContext sc)
-        {
-            if (sc.BrowserInfo.Contains("Android"))
-                return true;
-            return false;
-        }
-
-        public static bool IsiPhone(this IServiceContext sc)
-        {
-            if (sc.BrowserInfo.Contains("iPhone"))
-                return true;
-            return false;
-        }
-
-        public static bool IsiPad(this IServiceContext sc)
-        {
-            if (sc.BrowserInfo.Contains("iPad"))
-                return true;
-            return false;
-        }
-
-        public static bool IsIOS(this IServiceContext sc)
-        {
-            return IsiPhone(sc) || IsiPad(sc);
-        }
 
         #region yaml    
         private readonly static string[] _tabletKeywords = {

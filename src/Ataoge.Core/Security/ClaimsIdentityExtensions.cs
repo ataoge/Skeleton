@@ -2,9 +2,11 @@ using System;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Principal;
+using Ataoge;
+using Ataoge.Security;
 using JetBrains.Annotations;
 
-namespace Ataoge.Security
+namespace System.Security.Claims
 {
      public static class ClaimsIdentityExtensions
      {

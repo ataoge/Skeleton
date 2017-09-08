@@ -50,7 +50,7 @@ namespace Ataoge.Core.Tests
         {
             IServiceCollection services = new ServiceCollection();
             IModuleManager modulManager = new ModuleManager(new SkeletonOptions());
-            modulManager.Initialize(typeof(AutoMapper.AtaogeAutoMapperModule));
+            //modulManager.Initialize(typeof(AutoMapper.AtaogeAutoMapperModule));
             modulManager.ConfigModules(services);
             services.AddSingleton<IModuleManager>(modulManager);
             IServiceProvider sp = services.BuildServiceProvider();

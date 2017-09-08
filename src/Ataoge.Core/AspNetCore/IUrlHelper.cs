@@ -1,6 +1,6 @@
 namespace Ataoge.AspNetCore
 {
-    public interface IUrlHelper
+    public interface IUrlHelper : IUserAgentAccessor
     {
         bool CanUseRelativeUrl(string url);
 
@@ -10,6 +10,5 @@ namespace Ataoge.AspNetCore
 
         string GenerateRelativeUrl(string url);
 
-         string BrowserInfo { get;}
     }
 }

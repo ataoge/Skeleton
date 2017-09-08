@@ -1,9 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard1.6</TargetFramework>
+    <VersionPrefix>2.0.0</VersionPrefix>
+    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="6.0.2" />
-    <PackageReference Include="Ataoge.Core" Version="1.0.0" />
+    <PackageReference Include="AutoMapper" Version="6.1.1" />
+    <PackageReference Include="Ataoge.Core" Version="2.0.0" />
   </ItemGroup>
 </Project>

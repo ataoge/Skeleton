@@ -4,7 +4,7 @@ namespace Ataoge.EntityFrameworkCore.Repositories
 {
     interface IRepositoryHelper
     {
-        string InvariantName {get;}
+        string ProviderName {get;}
 
         string CreateParameterName(string name);
 

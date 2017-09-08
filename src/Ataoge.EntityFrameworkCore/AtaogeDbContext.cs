@@ -33,7 +33,7 @@ namespace  Ataoge.EntityFrameworkCore
          protected ISafSession<TKey> SafSession {get;}
     }
 
-    public class AtaogeDbContext : DbContext, IRepositoryContext, IRepositoryHelper
+    public class AtaogeDbContext : DbContext, IAtaogeDbContext, IRepositoryContext, IRepositoryHelper
     {
         public AtaogeDbContext(DbContextOptions<AtaogeDbContext> options)
             : base(options)
@@ -60,17 +60,19 @@ namespace  Ataoge.EntityFrameworkCore
 
         private void InitializeDbContext()
         {
+            // dbContextServices.DatabaseProviderServices.InvariantName;
+
             IServiceProvider sp = ((IInfrastructure<IServiceProvider>)(this)).Instance;
-        
-            var dbContextServices = sp.GetRequiredService<IDbContextServices>();
-            InvariantName = dbContextServices.DatabaseProviderServices.InvariantName;
+       
+            //var dbContextServices = sp.GetRequiredService<IDbContextServices>();
+           
             //ModelManager = sp.GetRequiredService<ModelManager>();
             SqlGenerationHelper = sp.GetRequiredService<ISqlGenerationHelper>();
         }
 
         protected ISqlGenerationHelper SqlGenerationHelper {get; private set;}
 
-        public string InvariantName {get; private set;}
+        public string ProviderName { get { return Database.ProviderName;}}
 
         public string CreateParameterName(string name)
         {
@@ -88,36 +90,12 @@ namespace  Ataoge.EntityFrameworkCore
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<SequencesRule>( b=>{
-                b.HasKey(t => t.PatternName);
-                b.Property(t => t.PatternName)
-                    .HasColumnName(ConvertName(nameof(SequencesRule.PatternName)));
-                b.Property(t => t.MinValue)
-                    .HasColumnName(ConvertName(nameof(SequencesRule.MinValue)));
-                b.Property(t => t.MaxValue)
-                    .HasColumnName(ConvertName(nameof(SequencesRule.MaxValue)));
-                b.Property(t => t.NextValue)
-                    .HasColumnName(ConvertName(nameof(SequencesRule.NextValue)));
-                b.Property(t => t.Continuum)
-                    .HasColumnName(ConvertName(nameof(SequencesRule.Continuum)));
-                b.Property(t => t.TableField)
-                    .HasColumnName(ConvertName(nameof(SequencesRule.TableField)));
-                b.Property(t => t.PreservedCount)
-                    .HasColumnName(ConvertName(nameof(SequencesRule.PreservedCount)));
-                b.Property(t => t.Step)
-                    .HasColumnName(ConvertName(nameof(SequencesRule.Step)));
-                b.Property( t => t.UpdateTime)
-                    .HasColumnName(ConvertName(nameof(SequencesRule.UpdateTime)))
-                    .ValueGeneratedOnAdd()
-                    .IsConcurrencyToken();
-             
-                 b.ToTable(ConvertName(nameof(SequencesRule)));
-             });
+            modelBuilder.ApplyConfiguration(new SequencesRuleMapper(this));
         }
 
         public virtual string ConvertName(string fromEntityName)
         {
-            switch (InvariantName)
+            switch (ProviderName)
             {
                 //case "MySql.Data.EntityFrameworkCore":
                 case "Npgsql.EntityFrameworkCore.PostgreSQL":
@@ -294,7 +272,7 @@ namespace  Ataoge.EntityFrameworkCore
         protected virtual void CheckAndSetMayHaveTenantIdProperty(object entityAsObj)
         {
             //Only works for single tenant applications
-            if (true)//(MultiTenancyConfig.IsEnabled)
+            if (entityAsObj == null)//(MultiTenancyConfig.IsEnabled)
             {
                 return;
             }

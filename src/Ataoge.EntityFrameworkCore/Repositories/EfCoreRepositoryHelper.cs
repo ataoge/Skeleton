@@ -222,7 +222,7 @@ namespace Ataoge.EntityFrameworkCore.Repositories
             {
                 var orderByAnno = entityType.FindProperty(orderByProperty).FindAnnotation("Relational:ColumnName");
                 orderByFieldName = orderByAnno!=null? orderByAnno.Value.ToString() : string.Format("\"{0}\"", orderByProperty);
-                forNpgsql = repositoryHelper.InvariantName == "Npgsql.EntityFrameworkCore.PostgreSQL";
+                forNpgsql = repositoryHelper.ProviderName == "Npgsql.EntityFrameworkCore.PostgreSQL";
             }
 
             if (forNpgsql)

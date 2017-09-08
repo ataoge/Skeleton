@@ -1,3 +1,5 @@
+using System;
+using Ataoge.ObjectMapping;
 using AutoMapper;
 using IObjectMapper = Ataoge.ObjectMapping.IObjectMapper;
 
@@ -12,14 +14,31 @@ namespace Ataoge.AutoMapper
             _mapper = mapper;
         }
 
-        public TDestination Map<TDestination>(object source)
+        public TDestination Map<TDestination>(object source, Action<IMapperContext> operationAction = null)
         {
-            return _mapper.Map<TDestination>(source);
+            if (operationAction == null)
+            {
+                return _mapper.Map<TDestination>(source);
+            }
+            var ctx = new AtaogeMapperContext();
+            return _mapper.Map<TDestination>(source, opts => {
+                ctx.Items = opts.Items;
+                operationAction(ctx);
+            });
         }
 
-        public TDestination Map<TSource, TDestination>(TSource source, TDestination destination)
+        public TDestination Map<TSource, TDestination>(TSource source, TDestination destination, Action<IMapperContext> operationAction = null)
         {
-            return _mapper.Map(source, destination);
+            if (operationAction == null)
+            {
+                return _mapper.Map(source, destination);
+            }
+            var ctx = new AtaogeMapperContext();
+            return _mapper.Map(source, destination, opts => {
+                ctx.Items = opts.Items;
+                operationAction(ctx);
+            });
         }
+
     }
 }
