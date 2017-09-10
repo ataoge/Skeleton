@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using Ataoge.Data.Entities;
 using Ataoge.EntityFrameworkCore.ModelConfiguration.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -21,6 +22,8 @@ namespace Ataoge.EntityFrameworkCore.Tests
         [Fact]
         public void TestRepostory()
         {
+            var bb = "bb";
+            TestExpr<SequencesRule>(t => t.PatternName == bb);
             IServiceCollection services = new ServiceCollection();
 
             
@@ -30,11 +33,11 @@ namespace Ataoge.EntityFrameworkCore.Tests
             });
             services.AddSingleton<IModelCustomizer, EntityTypeConfigurationModelCustomizer>();
 
-         
+            
           
 
             IServiceProvider sp = services.BuildServiceProvider();
-            var bb = "bb";
+     
             using(var dbContext = sp.GetService<TestDbContext>())
             {
                 var query = dbContext.Set<SequencesRule>().Where(BuildLamdaExpression<SequencesRule>("PatternName eq aaa", bb)).OrderBy(GetPropertyExpression<SequencesRule>("PatternName"));
@@ -45,13 +48,23 @@ namespace Ataoge.EntityFrameworkCore.Tests
 
         }
 
+        private void TestExpr<TEntity>(Expression< Func<TEntity, bool>> bbb)
+        {
+            
+        }
+
         private Expression< Func<TEntity, bool>> BuildLamdaExpression<TEntity>(string abc, string bb)
         {
             string[] aa = abc.Split(" ");
             var param = Expression.Parameter(typeof(TEntity), "t");
             var left = Expression.Property(param, aa[0].Trim());
-            var right =  Expression.Constant(bb);//aa[2].Trim());
             
+            string cc = bb;
+            var ddd = GetVarName<string>(t => cc);
+            var right =  Expression.Variable(typeof(string), "cc");//.Constant(bb);//aa[2].Trim());
+            var asn = Expression.Assign(right, Expression.Constant(bb));
+            
+            var mm = typeof(string).GetTypeInfo().GetMembers();
             Expression body;
             switch(aa[1].ToLower())
             {
@@ -60,13 +73,18 @@ namespace Ataoge.EntityFrameworkCore.Tests
                     break;
                 case "eq":
                 default:
-                    body = Expression.Equal(left, right);
+                    body = Expression.Equal(left, ddd);
                     break;
 
             }   
            
             var lambda = Expression.Lambda<Func<TEntity, bool>>(body, param);
             return lambda;
+        }
+
+        public static Expression GetVarName<T>(System.Linq.Expressions.Expression<Func<T, T>> exp)
+        {
+            return exp.Body;
         }
 
         public Expression<Func<TEntity, object>> GetPropertyExpression<TEntity>(string propertyName) 

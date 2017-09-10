@@ -64,15 +64,15 @@ namespace Ataoge.Data
             }
         }
 
-        public bool IsUniqeKey
+        public bool IsUniqueKey
         {
             get
             {
-                return IsFlag(SafFieldType.UniqeKey);
+                return IsFlag(SafFieldType.UniqueKey);
             }
             set
             {
-                SetFlag(SafFieldType.UniqeKey, value);
+                SetFlag(SafFieldType.UniqueKey, value);
             }
         }
 

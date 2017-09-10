@@ -13,7 +13,7 @@ namespace Ataoge.Data
         /// <summary>
         /// 唯一型字段
         /// </summary>
-        UniqeKey = 2,
+        UniqueKey = 2,
 
         /// <summary>
         ///外键字段 
