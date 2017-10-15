@@ -1,5 +1,6 @@
 using System;
 using System.Security.Cryptography;
+using JetBrains.Annotations;
 
 namespace Ataoge.Utilities
 {
@@ -90,6 +91,18 @@ namespace Ataoge.Utilities
             }
 
             return new Guid(guidBytes).ToString("N");
+        }
+
+        public static string ToCamelCase([NotNull]this string value)
+        {
+            return char.ToLower(value[0]) + value.Substring(1);
+        }
+
+        public static string NormalizeForKey([NotNull]this string name)
+        {
+            if (string.IsNullOrEmpty(name))
+                throw new ArgumentNullException(nameof(name));
+            return name.ToLower();
         }
     }
 }

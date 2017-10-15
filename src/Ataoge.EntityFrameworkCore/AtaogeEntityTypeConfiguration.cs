@@ -20,7 +20,7 @@ namespace Microsoft.EntityFrameworkCore
                 throw new System.ArgumentNullException(nameof(name));
 
             string providerName = _ataogeDbContext?.ProviderName;
-            switch(name)
+            switch(providerName)
             {
                 case "Npgsql.EntityFrameworkCore.PostgreSQL":
                     return name.ToLower();

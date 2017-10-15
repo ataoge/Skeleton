@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using Ataoge.Configuration;
 using Ataoge.Modules;
@@ -13,12 +15,12 @@ namespace Ataoge.Core.Tests
     public class UnitTest1
     {
         private class ExampleOption
-        { 
-            public int[] Array {get;set;}
+        {
+            public int[] Array { get; set; }
         }
         public UnitTest1()
         {
-             Console.WriteLine($"{Directory.GetCurrentDirectory()}");
+            Console.WriteLine($"{Directory.GetCurrentDirectory()}");
 
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
@@ -26,8 +28,8 @@ namespace Ataoge.Core.Tests
             Configuration = builder.Build();
         }
 
-        public IConfigurationRoot Configuration {get; set;}
-        
+        public IConfigurationRoot Configuration { get; set; }
+
         [Fact]
         public void Test1()
         {
@@ -42,7 +44,7 @@ namespace Ataoge.Core.Tests
             Console.WriteLine($"{optionsAccesstor.Value.Array[0]}, {optionsAccesstor.Value.Array[1]}");
 
             var result = false;
-             Assert.False(result, $"1 should not be prime");
+            Assert.False(result, $"1 should not be prime");
         }
 
         [Fact]
@@ -55,14 +57,46 @@ namespace Ataoge.Core.Tests
             services.AddSingleton<IModuleManager>(modulManager);
             IServiceProvider sp = services.BuildServiceProvider();
             IStartupConfiguration startupConfig = sp.GetService<IStartupConfiguration>();
-            Assert.False(startupConfig.MultiTenancy.IsEnabled,$"1 should not be prime");
+            Assert.False(startupConfig.MultiTenancy.IsEnabled, $"1 should not be prime");
         }
 
         [Fact]
         public void TestStringUtils()
         {
-            var a  = StringUtils.GenerateSequentialGuidString();
+            var bb = Type.GetTypeCode(typeof(double)).ToString();
+                     bb=    Type.GetTypeCode(typeof(DateTime)).ToString();
+  bb=    Type.GetTypeCode(typeof(float)).ToString();
+            var a = StringUtils.GenerateSequentialGuidString();
             var g = Guid.Parse(a);
+        }
+
+
+        [Fact]
+        public void TestIdWorker()
+        {
+            HashSet<long> set = new HashSet<long>();
+            IdWorker idWorker1 = new IdWorker(0, 0);
+            IdWorker idWorker2 = new IdWorker(1, 0);
+            //762884413578018816
+            //762884520121729024
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            for (int i = 0; i < 100; i++)
+            {
+                long id = idWorker1.NextId();
+                set.Add(id);
+                //if (!set.Add(id))
+                //{
+                //Console.WriteLine("duplicate:" + id);
+                //}
+            }
+            sw.Stop();
+            foreach (var item in set)
+            {
+                Console.WriteLine("结果:" + item);
+            }
+            Console.WriteLine("时间:" + sw.ElapsedTicks);
+            return;
         }
     }
 }

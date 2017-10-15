@@ -73,7 +73,7 @@ namespace Ataoge.EntityFrameworkCore.Repositories
             return new QueryablePageResult<TEntity>(qq, count, entityType, filteredRecord);
         }
 
-        public static IQueryable<TEntity> TreeQuery<TEntity, TKey>(string invariantName, IQueryable<TEntity> query, IEntityType entityType, Expression<Func<TEntity, bool>> startQuery, Expression<Func<TEntity, bool>> whereQuery = null, bool upSearch = false, string orderByProperty = null, int level = 0) 
+        public static IQueryable<TEntity> TreeQuery<TEntity, TKey>(string invariantName, IQueryable<TEntity> query, IEntityType entityType, Expression<Func<TEntity, bool>> startQuery, Expression<Func<TEntity, bool>> whereQuery = null, bool upSearch = false, string orderByProperty = null, int level = 0, bool distinct = false) 
             where TEntity: class, IEntity<TKey> //ITreeEntity<TKey>
             //where TKey : struct, IEquatable<TKey>
         {
@@ -88,16 +88,16 @@ namespace Ataoge.EntityFrameworkCore.Repositories
             string firstQuery = query.Where(startQuery).ToSql().Replace("\r\n", " ");
             string startQueryParament = startQuery.Parameters[0].Name;
 
-            bool forNpgsql = false;
+            bool forNpgsql = IsNpgSql(invariantName); 
             string orderByFieldName = null;
             if (!string.IsNullOrEmpty(orderByProperty))
             {
                 var orderByAnno = entityType.FindProperty(orderByProperty).FindAnnotation("Relational:ColumnName");
                 orderByFieldName = orderByAnno!=null? orderByAnno.Value.ToString() : string.Format("\"{0}\"", orderByProperty);
-                forNpgsql = invariantName == "Npgsql.EntityFrameworkCore.PostgreSQL";
+                //forNpgsql = invariantName == "Npgsql.EntityFrameworkCore.PostgreSQL";
             }
 
-             if (forNpgsql)
+             if (forNpgsql && !string.IsNullOrEmpty(orderByFieldName))
             {
                 firstQuery = firstQuery.Insert(firstQuery.IndexOf(" FROM", StringComparison.CurrentCultureIgnoreCase), string.Format(", 0 As level, array[\"{0}\".\"{1}\"] as sorder", startQueryParament, orderByFieldName));
             }
@@ -113,7 +113,7 @@ namespace Ataoge.EntityFrameworkCore.Repositories
             {
                 secondQuery = query.ToSql().Replace("\r\n", " ");
                 thirdQuery = secondQuery;
-                if (forNpgsql)
+                if (forNpgsql && !string.IsNullOrEmpty(orderByFieldName))
                 {
                     secondQuery = secondQuery.Insert(secondQuery.IndexOf(" FROM", StringComparison.CurrentCultureIgnoreCase), string.Format(", mytree.level + 1, sorder || \"{0}\".\"{1}\" as sorder",whereQueryParament, orderByFieldName));
                 }
@@ -178,6 +178,8 @@ namespace Ataoge.EntityFrameworkCore.Repositories
             }
             sqlBuilder.Append(") ");
 
+            if (distinct)
+                thirdQuery = thirdQuery.Replace("SELECT", "SELECT DISTINCT");
             thirdQuery = thirdQuery.Replace(tableName, "mytree");
             sqlBuilder.Append(thirdQuery);
             if (level > 0)
@@ -197,7 +199,7 @@ namespace Ataoge.EntityFrameworkCore.Repositories
             return query.FromSql(sqlBuilder.ToString());
         }
 
-        public static IQueryable<TEntity> TreeQuery<TEntity, TKey>(IRepositoryHelper repositoryHelper, IQueryable<TEntity> query, IEntityType entityType, Expression<Func<TEntity, bool>> startQuery, Expression<Func<TEntity, bool>> whereQuery = null, bool upSearch = false, string orderByProperty = null, int level = 0) 
+        public static IQueryable<TEntity> TreeQuery<TEntity, TKey>(IRepositoryHelper repositoryHelper, IQueryable<TEntity> query, IEntityType entityType, Expression<Func<TEntity, bool>> startQuery, Expression<Func<TEntity, bool>> whereQuery = null, bool upSearch = false, string orderByProperty = null, int level = 0, bool distinct = false) 
             where TEntity: class, IEntity<TKey> //ITreeEntity<TKey>
             //where TKey : struct, IEquatable<TKey>
         {
@@ -216,16 +218,16 @@ namespace Ataoge.EntityFrameworkCore.Repositories
             string firstQuery = firstSqls.Sql.Replace("\r\n", " ");
             string startQueryParament = startQuery.Parameters[0].Name;
 
-            bool forNpgsql = false;
+            bool forNpgsql = IsNpgSql(repositoryHelper?.ProviderName); 
             string orderByFieldName = null;
             if (!string.IsNullOrEmpty(orderByProperty))
             {
                 var orderByAnno = entityType.FindProperty(orderByProperty).FindAnnotation("Relational:ColumnName");
                 orderByFieldName = orderByAnno!=null? orderByAnno.Value.ToString() : string.Format("\"{0}\"", orderByProperty);
-                forNpgsql = repositoryHelper.ProviderName == "Npgsql.EntityFrameworkCore.PostgreSQL";
+                //forNpgsql = repositoryHelper.ProviderName == "Npgsql.EntityFrameworkCore.PostgreSQL";
             }
 
-            if (forNpgsql)
+            if (forNpgsql && !string.IsNullOrEmpty(orderByFieldName))
             {
                 firstQuery = firstQuery.Insert(firstQuery.IndexOf(" FROM", StringComparison.CurrentCultureIgnoreCase), string.Format(", 0 As level, array[\"{0}\".\"{1}\"] as sorder", startQueryParament, orderByFieldName));
             }
@@ -248,7 +250,7 @@ namespace Ataoge.EntityFrameworkCore.Repositories
             {
                 secondQuery = query.ToSql().Replace("\r\n", " ");
                 thirdQuery = secondQuery;
-                if (forNpgsql)
+                if (forNpgsql && !string.IsNullOrEmpty(orderByFieldName))
                 {
                     secondQuery = secondQuery.Insert(secondQuery.IndexOf(" FROM", StringComparison.CurrentCultureIgnoreCase), string.Format(", mytree.level + 1, sorder || \"{0}\".\"{1}\" as sorder",whereQueryParament, orderByFieldName));
                 }
@@ -316,6 +318,8 @@ namespace Ataoge.EntityFrameworkCore.Repositories
             }
             sqlBuilder.Append(") ");
 
+            if (distinct)
+                thirdQuery = thirdQuery.Replace("SELECT", "SELECT DISTINCT");
             thirdQuery = thirdQuery.Replace(tableName, "mytree");
             sqlBuilder.Append(thirdQuery);
             if (level > 0)
@@ -339,6 +343,11 @@ namespace Ataoge.EntityFrameworkCore.Repositories
             //    pp.Value = 1;
 
             return query.FromSql(sqlBuilder.ToString(), dbParameters.ToArray());
+        }
+
+        private static bool IsNpgSql(string providerName)
+        {
+            return providerName ==  "Npgsql.EntityFrameworkCore.PostgreSQL";
         }
 
         private  static void AddDbParameter(IRepositoryHelper repositoryHelper, List<DbParameter> dbParameters, SqlWithParameters sqlParameter)

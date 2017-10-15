@@ -1,4 +1,6 @@
 using Ataoge.AspNetCore.Runtime.Session;
+using Ataoge.Data.Metadata;
+using Ataoge.Data.Metadata.Internal;
 using Ataoge.Modules;
 using Ataoge.Runtime.Session;
 using Ataoge.Services;
@@ -16,6 +18,8 @@ namespace Ataoge.AspNetCore
             services.TryAddSingleton<IPrincipalAccessor, AspNetCorePrincipalAccessor>();
             services.TryAddSingleton<IUrlHelper, AtaogeUrlHelper>();
             services.TryAddTransient<IServiceContext, AspNetCoreServiceContext>();
+            
+            services.TryAddSingleton<IViewModelManager, ViewModelManager>();
         }
 
 

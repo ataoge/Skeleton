@@ -48,12 +48,16 @@ namespace Ataoge.EntityFrameworkCore.Repositories
             // 构造表达式；
         }
 
-        public IQueryable<TEntity> GetAllChildren(Expression<Func<TEntity, bool>> where, string orderBySilbing = null)
+        public IQueryable<TEntity> GetAllChildren(Expression<Func<TEntity, bool>> where, bool startQuery = false, string orderBySilbing = null)
         {
             
             var entityType = Context.Model.FindEntityType(typeof(TEntity).FullName);
+            if (startQuery)
+                return  EfCoreRepositoryHelper.TreeQuery<TEntity,TPrimaryKey>(_repositoryHelper.ProviderName, Table, entityType, where, null, false, orderBySilbing, 0, distinct:true);
             return  EfCoreRepositoryHelper.TreeQuery<TEntity,TPrimaryKey>(_repositoryHelper.ProviderName, Table, entityType, t => t.Pid == null, where, false, orderBySilbing);
         }
+
+        
 
         public List<TEntity> GetParentList(TPrimaryKey id)
         {

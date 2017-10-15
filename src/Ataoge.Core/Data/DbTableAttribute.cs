@@ -38,5 +38,11 @@ namespace Ataoge.Data
             get { return this.schemeName;}
             set { this.schemeName = value;}
         }
+
+        public Type RepostitoryInterface
+        {
+            get;
+            set;
+        }
     }
 }

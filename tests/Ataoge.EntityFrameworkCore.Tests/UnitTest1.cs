@@ -33,14 +33,15 @@ namespace Ataoge.EntityFrameworkCore.Tests
             });
             services.AddSingleton<IModelCustomizer, EntityTypeConfigurationModelCustomizer>();
 
-            
-          
-
+            Expression<Func<TestA, object>> cd = t => t.TestClass.Id;
+           
             IServiceProvider sp = services.BuildServiceProvider();
      
             using(var dbContext = sp.GetService<TestDbContext>())
             {
-                var query = dbContext.Set<SequencesRule>().Where(BuildLamdaExpression<SequencesRule>("PatternName eq aaa", bb)).OrderBy(GetPropertyExpression<SequencesRule>("PatternName"));
+               
+                Expression<Func<SequencesRule, bool>>  aaa = BuildLamdaExpression<SequencesRule>("PatternName eq aaa", bb) as Expression<Func<SequencesRule, bool>> ;
+                var query = dbContext.Set<SequencesRule>().Where(aaa).OrderBy(GetPropertyExpression<SequencesRule>("PatternName"));
                 string aa = query.ToSql(true);
                 var result =query.ToList();
 
@@ -48,12 +49,14 @@ namespace Ataoge.EntityFrameworkCore.Tests
 
         }
 
+       
+
         private void TestExpr<TEntity>(Expression< Func<TEntity, bool>> bbb)
         {
             
         }
 
-        private Expression< Func<TEntity, bool>> BuildLamdaExpression<TEntity>(string abc, string bb)
+        private Expression BuildLamdaExpression<TEntity>(string abc, string bb)
         {
             string[] aa = abc.Split(" ");
             var param = Expression.Parameter(typeof(TEntity), "t");
@@ -78,7 +81,7 @@ namespace Ataoge.EntityFrameworkCore.Tests
 
             }   
            
-            var lambda = Expression.Lambda<Func<TEntity, bool>>(body, param);
+            var lambda = Expression.Lambda(body, param);
             return lambda;
         }
 

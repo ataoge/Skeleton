@@ -77,4 +77,28 @@ namespace Ataoge.AutoMapper
             return _urlHelper.GenerateRelativeUrl(source.Url);
         }
     }
+
+    public class AtaogeUrlMembarValueResolver : IMemberValueResolver<IHasUrl, IHasUrl, string, string>
+    {
+        public AtaogeUrlMembarValueResolver(IUrlHelper urlHelper, IOptions<SettingsOptions> optionsAccessor)
+        {
+            this._urlHelper = urlHelper;
+            this._options = optionsAccessor.Value;
+        }
+
+        private readonly SettingsOptions _options;
+        private readonly IUrlHelper _urlHelper;
+        public string Resolve(IHasUrl source, IHasUrl destination, string sourceMember, string destMember, ResolutionContext context)
+        {
+            if (context.Items.ContainsKey("flag"))
+            {
+                if (context.Items["flag"].ToString() == "todb")
+                    return _urlHelper.GenerateRelativeUrl(sourceMember);
+            } 
+
+            if (_urlHelper.IsAndroid() || _urlHelper.IsIOS())
+                return _urlHelper.GenerateAbsoluteUrl(source.Url);
+            return _urlHelper.GenerateNormalUrl(source.Url);
+        }
+    }
 }

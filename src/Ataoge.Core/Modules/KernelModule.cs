@@ -2,6 +2,8 @@ using System;
 using Ataoge.Application.Navigation;
 using Ataoge.Configuration;
 using Ataoge.Infrastructure;
+using Ataoge.Repositories;
+using Ataoge.Repositories.Internal;
 using Ataoge.Runtime.Session;
 using Ataoge.Security;
 using Ataoge.Utilities;
@@ -42,7 +44,8 @@ namespace Ataoge.Modules
             //services.TryAddSingleton<INavigationConfiguration, NavigationConfiguration>();
             //services.AddSingleton<IModuleConfigurations, ModuleConfigurations>();
             //services.AddSingleton<IMultiTenancyConfig, MultiTenancyConfig>();
-       
+            
+            services.TryAddScoped<IRepositoryManager, RepositoryManager>();
         }
 
         protected override void OnInitilize(IServiceProvider serviceProvider)

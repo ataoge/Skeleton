@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
 namespace Ataoge.EntityFrameworkCore.Tests
@@ -25,10 +26,20 @@ namespace Ataoge.EntityFrameworkCore.Tests
             
              base.OnModelCreating(modelBuilder);
          }
+
+
     }
 
     public class Test
     {
         public int Id {get; set;}
+    }
+
+    public class TestA 
+    {
+        public string Name {get; set;}
+        public virtual ICollection<Test> Test {get; set;}
+
+        public Test TestClass {get; set;}
     }
 }

@@ -14,11 +14,16 @@ namespace Ataoge.AutoMapper
             _mapper = mapper;
         }
 
+        public TDestination Map<TDestination>(object source)
+        {
+             return _mapper.Map<TDestination>(source);
+        }
+
         public TDestination Map<TDestination>(object source, Action<IMapperContext> operationAction = null)
         {
             if (operationAction == null)
             {
-                return _mapper.Map<TDestination>(source);
+               return Map<TDestination>(source);
             }
             var ctx = new AtaogeMapperContext();
             return _mapper.Map<TDestination>(source, opts => {
@@ -31,7 +36,7 @@ namespace Ataoge.AutoMapper
         {
             if (operationAction == null)
             {
-                return _mapper.Map(source, destination);
+                return Map(source, destination);
             }
             var ctx = new AtaogeMapperContext();
             return _mapper.Map(source, destination, opts => {
@@ -40,5 +45,11 @@ namespace Ataoge.AutoMapper
             });
         }
 
+      
+
+        public TDestination Map<TSource, TDestination>(TSource source, TDestination destination)
+        {
+            return _mapper.Map(source, destination);
+        }
     }
 }

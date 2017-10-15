@@ -20,5 +20,15 @@ namespace Ataoge.ObjectMapping
         {
             throw new SafException("Ataoge.ObjectMapping.IObjectMapper should be implemented in order to map objects.");
         }
+
+        public TDestination Map<TDestination>(object source)
+        {
+            throw new SafException("Ataoge.ObjectMapping.IObjectMapper should be implemented in order to map objects.");
+        }
+
+        public TDestination Map<TSource, TDestination>(TSource source, TDestination destination)
+        {
+            throw new SafException("Ataoge.ObjectMapping.IObjectMapper should be implemented in order to map objects.");
+        }
     }
 }

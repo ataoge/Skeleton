@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Ataoge.ObjectMapping
@@ -8,6 +9,7 @@ namespace Ataoge.ObjectMapping
         {
 
         }
+
         
         public IDictionary<string, object> Items {get; set;}
     }

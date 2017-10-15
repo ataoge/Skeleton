@@ -6,7 +6,13 @@ using Ataoge.Data;
 
 namespace Ataoge.Repositories
 {
-    public interface IRepositoryOfTreeEntity<TEntity, TPrimaryKey>
+    public interface IRepositoryOfTreeEntity<TEntity>
+        where TEntity : class
+    {
+        IQueryable<TEntity> GetAllChildren(Expression<Func<TEntity, bool>> where, bool startQuery = false, string orderBySilbing = null);
+    }
+
+    public interface IRepositoryOfTreeEntity<TEntity, TPrimaryKey> : IRepositoryOfTreeEntity<TEntity>
          where TEntity : class//, ITreeEntity<TPrimaryKey> 
     {
         IQueryable<TEntity> GetChildren(TPrimaryKey id, bool recursion = false, Expression<Func<TEntity, bool>> where = null, string orderBySilbing = null);
@@ -15,8 +21,8 @@ namespace Ataoge.Repositories
 
         IQueryable<TEntity> GetSiblings(TPrimaryKey id, string orderBySilbing = null);
 
-        IQueryable<TEntity> GetAllChildren(Expression<Func<TEntity, bool>> where, string orderBySilbing = null);
-
+        //IQueryable<TEntity> GetAllChildren(Expression<Func<TEntity, bool>> where, string orderBySilbing = null);
+       
         IQueryable<TEntity> GetParents(TPrimaryKey id);
 
         List<TEntity> GetParentList(TPrimaryKey id);

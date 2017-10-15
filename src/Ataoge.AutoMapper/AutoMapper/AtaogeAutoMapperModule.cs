@@ -16,9 +16,11 @@ namespace Ataoge.AutoMapper
             //services.AddSingleton<IAtaogeAutoMapperConfiguration, AtaogeAutoMapperConfiguration>();
             services.AddSingleton<ObjectMapping.IObjectMapper, AutoMapperObjectMapper>();
             
-            services.AddScoped<FrontendUrlValueResolver>();
-            services.AddScoped<BackendUrlValueResolver>();
-            services.AddScoped<HtmlContentValueResolver>();
+            services.AddSingleton<FrontendUrlValueResolver>();
+            services.AddSingleton<BackendUrlValueResolver>();
+            services.AddSingleton<HtmlContentValueResolver>();
+
+            services.AddSingleton<AtaogeUrlMembarValueResolver>();
         }
 
         protected override void OnConfiguredService(IServiceCollection services)
@@ -49,8 +51,10 @@ namespace Ataoge.AutoMapper
             {
                 Mapper.Initialize(configurer);
                 services.AddSingleton(Mapper.Configuration);
-               services.AddSingleton<IMapper>(sp => 
-                  new Mapper(sp.GetRequiredService<IConfigurationProvider>(), sp.GetService));
+                //services.AddScoped<IMapper>(sp => 
+                //  new Mapper(sp.GetRequiredService<IConfigurationProvider>(), sp.GetService));
+                services.AddSingleton<IMapper>(sp => 
+                   new Mapper(sp.GetRequiredService<IConfigurationProvider>(), sp.GetService));
 
                 //services.AddSingleton<IMapper>(Mapper.Instance);
             }
