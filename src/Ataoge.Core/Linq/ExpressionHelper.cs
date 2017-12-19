@@ -121,7 +121,8 @@ namespace Ataoge.Linq
             }
         }
 
-        internal static Expression BuildColumnConditionExpression(ParameterExpression parameterExpression, Type entityType, string propertyName, string valueType, FilterMode searchMode, List<Condition> conditions, bool bodyOnly = true)
+
+        internal static Expression BuildColumnConditionExpression(ParameterExpression parameterExpression, Type entityType, string propertyName, string valueType, SearchMode searchMode, FilterMode filterMode, List<Condition> conditions, bool bodyOnly = true)
         {
             Expression bodyExpression = null;
             //var propertyName = propertyName;
@@ -140,7 +141,7 @@ namespace Ataoge.Linq
                     classType = classType.GenericTypeArguments[0];
                     var paramExpression =ExpressionHelper.BuildParameterExpression(classType, "m");
 
-                    var subbodyExpression = BuildColumnConditionExpression(paramExpression, classType, propertyNames[1], valueType, searchMode, conditions, false);
+                    var subbodyExpression = BuildColumnConditionExpression(paramExpression, classType, propertyNames[1], valueType, searchMode, filterMode, conditions, false);
                     bodyExpression = Expression.Call(typeof(Enumerable), "Any", new Type[] { classType }, property1, subbodyExpression);
                     if (bodyOnly)
                         return bodyExpression;
@@ -158,14 +159,16 @@ namespace Ataoge.Linq
                 
             foreach (var condition in conditions)
             {
-                Expression valueExpression = BuildValueExpression(valueType, condition.Value);
+                Expression valueExpression = null;
                 Expression left = null;
                 switch (condition.Key)
                 {
                     case "eq":
                         switch (searchMode)
                         {
-                            case FilterMode.FlagOr:
+                            case SearchMode.FlagOr:
+                            case SearchMode.Flag:
+                                valueExpression = BuildValueExpression(valueType, condition.Value);
                                 left = Expression.And(prpertyExpression, valueExpression);
                                 if (bodyExpression == null)
                                 {
@@ -173,42 +176,106 @@ namespace Ataoge.Linq
                                 }
                                 else
                                 {
-                                    bodyExpression = Expression.OrElse(bodyExpression, Expression.Equal(left, valueExpression));
+                                    switch (filterMode)
+                                    {
+                                        case FilterMode.Or:
+                                            bodyExpression = Expression.OrElse(bodyExpression, Expression.Equal(left, valueExpression));
+                                            break;
+                                        case FilterMode.And:
+                                        default:
+                                            bodyExpression = Expression.AndAlso(bodyExpression, Expression.Equal(left, valueExpression));
+                                            break;
+                                    }
+
                                 }
+                                
                                 break;
-                            case FilterMode.FlagAnd:
-                                left = Expression.And(prpertyExpression, valueExpression);
+                           
+                            case SearchMode.DataTimeDay:
+                            case SearchMode.DateTimeMonth:
+                            case SearchMode.DateTimeYear:
+                                var dateTimeTuple = GetDateTimeRange(searchMode, condition.Value);
+                                valueExpression = GetVarName<DateTime>(t => dateTimeTuple.Item1);
+                                var ll = Expression.GreaterThanOrEqual(prpertyExpression, valueExpression);
+                                valueExpression = GetVarName<DateTime>(t => dateTimeTuple.Item2);
+                                var rr = Expression.LessThan(prpertyExpression, valueExpression);
+                             
                                 if (bodyExpression == null)
                                 {
-                                    bodyExpression = Expression.Equal(left, valueExpression);
+                                    bodyExpression = Expression.AndAlso(ll, rr);
                                 }
                                 else
                                 {
-                                    bodyExpression = Expression.AndAlso(bodyExpression, Expression.Equal(left, valueExpression));
+                                    var ae = Expression.AndAlso(ll, rr);
+                                    switch(filterMode)
+                                    {
+                                        case FilterMode.Or:
+                                             bodyExpression = Expression.OrElse(bodyExpression, ae);
+                                            break;
+                                        case FilterMode.And:
+                                        default:
+                                            bodyExpression = Expression.AndAlso(bodyExpression, ae);
+                                            break;
+                                    }
                                 }
                                 break;
-                            case FilterMode.NormalOr:
-                                if (bodyExpression == null)
+                            case SearchMode.StringValue:
+                                if (condition.Value == "NULL" || condition.Value == "*")
                                 {
-                                    bodyExpression = Expression.Equal(prpertyExpression, valueExpression);
+                                    valueExpression = Expression.Constant(null);
                                 }
                                 else
                                 {
-                                    bodyExpression = Expression.OrElse(bodyExpression, Expression.Equal(prpertyExpression, valueExpression));
+                                    valueExpression = BuildValueExpression(valueType, condition.Value);
+                                }
+                                Expression be = null;
+                                if (condition.Value == "*") 
+                                    be = Expression.NotEqual(prpertyExpression, valueExpression);
+                                else
+                                    be = Expression.Equal(prpertyExpression, valueExpression);
+
+                                if (bodyExpression == null)
+                                {
+                                    bodyExpression = be;
+                                }
+                                else
+                                {
+                                    
+                                    switch(filterMode)
+                                    {
+                                        case FilterMode.Or:
+                                            bodyExpression = Expression.OrElse(bodyExpression, be);
+                                            break;
+                                        case FilterMode.And:
+                                        default:
+                                            bodyExpression = Expression.AndAlso(bodyExpression, be);
+                                            break;
+                                    }
                                 }
                                 break;
-                            case FilterMode.ContainsAnd:
-                            case FilterMode.ContainsOr:
+                            case SearchMode.Contains:
+                            case SearchMode.ContainsOr:
                                 break;
-                            case FilterMode.NormalAnd:
+                            case SearchMode.NormalOr:
+                            case SearchMode.Normal:
                             default:
+                                valueExpression = BuildValueExpression(valueType, condition.Value);
                                 if (bodyExpression == null)
                                 {
                                     bodyExpression = Expression.Equal(prpertyExpression, valueExpression);
                                 }
                                 else
                                 {
-                                    bodyExpression = Expression.AndAlso(bodyExpression, Expression.Equal(prpertyExpression, valueExpression));
+                                    switch(filterMode)
+                                    {
+                                        case FilterMode.Or:
+                                             bodyExpression = Expression.OrElse(bodyExpression, Expression.Equal(prpertyExpression, valueExpression));
+                                             break;
+                                        case FilterMode.And:
+                                        default:
+                                             bodyExpression = Expression.AndAlso(bodyExpression, Expression.Equal(prpertyExpression, valueExpression));
+                                             break;
+                                    }
                                 }
                                 break;
                         }
@@ -216,28 +283,31 @@ namespace Ataoge.Linq
                     case "gt":
                         switch (searchMode)
                         {
-                            case FilterMode.NormalOr:
-                                if (bodyExpression == null)
-                                {
-                                    bodyExpression = Expression.GreaterThan(prpertyExpression, valueExpression);
-                                }
-                                else
-                                {
-                                    bodyExpression = Expression.Or(bodyExpression, Expression.GreaterThan(prpertyExpression, valueExpression));
-                                }
+                           
+                            case SearchMode.Contains:  
+                           
+                            case SearchMode.ContainsOr:
                                 break;
-                            case FilterMode.ContainsAnd:
-                            case FilterMode.ContainsOr:
-                                break;
-                            case FilterMode.NormalAnd:
+                            case SearchMode.NormalOr:
+                            case SearchMode.Normal:
                             default:
+                                valueExpression = BuildValueExpression(valueType, condition.Value);
                                 if (bodyExpression == null)
                                 {
                                     bodyExpression = Expression.GreaterThan(prpertyExpression, valueExpression);
                                 }
                                 else
                                 {
-                                    bodyExpression = Expression.And(bodyExpression, Expression.GreaterThan(prpertyExpression, valueExpression));
+                                    switch(filterMode)
+                                    {
+                                        case FilterMode.Or:
+                                             bodyExpression = Expression.OrElse(bodyExpression, Expression.Equal(prpertyExpression, valueExpression));
+                                             break;
+                                        case FilterMode.And:
+                                        default:
+                                             bodyExpression = Expression.AndAlso(bodyExpression, Expression.Equal(prpertyExpression, valueExpression));
+                                             break;
+                                    }
                                 }
                                 break;
 
@@ -254,6 +324,33 @@ namespace Ataoge.Linq
                 return Expression.Lambda(bodyExpression, parameterExpression);
 
             return null;
+        }
+
+
+        static Tuple<DateTime, DateTime> GetDateTimeRange(SearchMode searchMode, string value)
+        {
+            DateTime startTime;
+            DateTime endTime;
+            switch(searchMode)
+            {
+                case SearchMode.DateTimeYear:
+                    startTime = DateTime.ParseExact(value, "yyyy", null);
+                    endTime = startTime.AddYears(1);
+                    break;
+                case SearchMode.DateTimeMonth:
+                    startTime = DateTime.ParseExact(value, "yyyyMM", null);
+                    endTime = startTime.AddMonths(1);
+                    break;
+                case SearchMode.DataTimeDay:
+                    startTime = DateTime.ParseExact(value, "yyyyMMdd", null);
+                    endTime = startTime.AddDays(1);
+                    break;
+                default:
+                    startTime = DateTime.Now;
+                    endTime = DateTime.Now;
+                    break;
+            }
+            return Tuple.Create(startTime, endTime);
         }
 
 
@@ -305,7 +402,7 @@ namespace Ataoge.Linq
             {
                 ParameterExpression parameterExpression = BuildParameterExpression(typeof(TEntity));
                 UiColumnInfo columnInfo = columnCondition.Key;
-                Expression<Func<TEntity, bool>> prediateExpression = BuildColumnConditionExpression(parameterExpression, typeof(TEntity), columnInfo.PropertyName, columnInfo.PropertyValueType, columnInfo.SearchMode, columnCondition.Value, false)
+                Expression<Func<TEntity, bool>> prediateExpression = BuildColumnConditionExpression(parameterExpression, typeof(TEntity), columnInfo.PropertyName, columnInfo.PropertyValueType, columnInfo.SearchMode, columnInfo.FilterMode, columnCondition.Value, false)
                                                                         as Expression<Func<TEntity, bool>>;
                 if (prediateExpression != null)
                     expressions.Add(prediateExpression);

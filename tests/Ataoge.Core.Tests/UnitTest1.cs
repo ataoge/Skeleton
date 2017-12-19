@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using Ataoge.Configuration;
+using Ataoge.Data.Entities;
 using Ataoge.Modules;
 using Ataoge.Utilities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using Xunit;
 
 namespace Ataoge.Core.Tests
@@ -65,9 +67,16 @@ namespace Ataoge.Core.Tests
         {
             var bb = Type.GetTypeCode(typeof(double)).ToString();
                      bb=    Type.GetTypeCode(typeof(DateTime)).ToString();
-  bb=    Type.GetTypeCode(typeof(float)).ToString();
+            bb=    Type.GetTypeCode(typeof(float)).ToString();
             var a = StringUtils.GenerateSequentialGuidString();
             var g = Guid.Parse(a);
+        }
+
+        [Fact]
+        public void TestStringUtils2()
+        {
+
+            bool result = StringUtils.IsMobilePhone("13312341234");
         }
 
 
@@ -97,6 +106,45 @@ namespace Ataoge.Core.Tests
             }
             Console.WriteLine("时间:" + sw.ElapsedTicks);
             return;
+        }
+
+        [Fact]
+        public void TestDateTime()
+        {
+            
+            var result = DateTime.Today.LastWeekRange();
+        }
+
+        [Fact]
+        public void TestJsonData()
+        {
+            
+            CommonDataEntity<int> aa = new CommonEntity();
+            aa.Id = 1;
+            aa["aa"] = "bbb";
+            string json = JsonConvert.SerializeObject(aa);
+            var bb = JsonConvert.DeserializeObject<CommonEntity>(json);
+        }
+    }
+
+
+    public class CommonEntity : CommonDataEntity<int>
+    {
+        [JsonExtensionData]
+        private IDictionary<string, object> overrideDcits = new Dictionary<string, object>();
+
+        public override object this[string key]
+        {
+            get 
+            {
+                if (overrideDcits.ContainsKey(key))
+                    return overrideDcits[key];
+                return null;
+            }
+            set
+            {
+                overrideDcits[key] = value;
+            }
         }
     }
 }

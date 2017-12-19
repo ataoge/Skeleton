@@ -18,6 +18,8 @@ namespace Ataoge.Data.Metadata
             => viewModel.GetColumnInfos().OrderByDescending(t => t.Weight);
         public static IEnumerable<UiColumnInfo> GetSearchableColumnInfos(this IViewModel viewModel)
             => viewModel.GetColumnInfos().Where(t => t.Searchable == true);
+        public static IEnumerable<UiColumnInfo> GetFilterableColumnInfos(this IViewModel viewModel)
+            => viewModel.GetColumnInfos().Where(t => t.Filterable == true);
 
     }
 }

@@ -13,7 +13,7 @@ namespace System.Security.Claims
        
         public static string GetDisplayName(this ClaimsPrincipal principal)
         {
-            var claim =principal.Claims.FirstOrDefault(c => c.Type=="preferred_username");
+            var claim =principal.Claims.FirstOrDefault(c => c.Type=="displayname");
             if (claim != null)
                 return claim.Value;
             return principal.Identity.Name;

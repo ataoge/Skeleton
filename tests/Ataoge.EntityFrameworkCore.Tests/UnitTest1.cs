@@ -39,13 +39,47 @@ namespace Ataoge.EntityFrameworkCore.Tests
      
             using(var dbContext = sp.GetService<TestDbContext>())
             {
-               
+     
                 Expression<Func<SequencesRule, bool>>  aaa = BuildLamdaExpression<SequencesRule>("PatternName eq aaa", bb) as Expression<Func<SequencesRule, bool>> ;
                 var query = dbContext.Set<SequencesRule>().Where(aaa).OrderBy(GetPropertyExpression<SequencesRule>("PatternName"));
                 string aa = query.ToSql(true);
                 var result =query.ToList();
 
             }
+
+        }
+
+        [Fact]
+        public void TestSqlQuery()
+        {
+            IServiceCollection services = new ServiceCollection();
+
+            
+            services.AddDbContext<TestDbContext>(options => {
+                options.UseSqlite("Data Source=test.db");
+                options.AddEntityTypeConfigurations();
+            });
+
+            services.AddScoped<IScope, MyScope>();
+
+            services.AddSingleton<ISingleton>(p => {
+                var scope = p.GetRequiredService<IScope>();
+                return new Singleton(scope);
+            });
+
+            IServiceProvider sp = services.BuildServiceProvider();
+
+            var ss = sp.GetRequiredService<ISingleton>();
+            var sc = sp.GetRequiredService<IScope>();
+            var bb = sp.GetRequiredService<ISingleton>();
+     
+            IEnumerable<TestEntity> aa = null;
+            using(var dbContext = sp.GetService<TestDbContext>())
+            {
+                aa = dbContext.Database.GetEntityFromSqlQuery<TestEntity, int>(() => new TestEntity(), "select t.Id, T.Name from Test t");
+            }
+
+            var testEntity = aa.ToList();
 
         }
 
@@ -109,4 +143,31 @@ namespace Ataoge.EntityFrameworkCore.Tests
             return Expression.Lambda(body, param);  
         }  
     }
+
+    public interface ISingleton
+    {
+        string Name {get; set;}
+    }
+
+    public interface IScope
+    {
+        string Name {get; set;}
+    }
+
+    public class MyScope : IScope
+    {
+        public string Name {get; set;} = Guid.NewGuid().ToString();
+    }
+
+    public class Singleton : ISingleton
+    {
+        public Singleton(IScope scope)
+        {
+            Name = scope.Name;
+        }
+
+        public string Name {get; set;} 
+
+    }
+    
 }

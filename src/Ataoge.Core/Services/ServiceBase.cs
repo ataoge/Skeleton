@@ -91,7 +91,9 @@ namespace Ataoge.Services
 
         protected virtual Expression BuildColumnConditionExpression(ParameterExpression parameterExpression, Type entityType, UiColumnInfo columnInfo, List<Condition> conditions)
         {
-            return ExpressionHelper.BuildColumnConditionExpression(parameterExpression, entityType, columnInfo.PropertyName, columnInfo.PropertyValueType, columnInfo.SearchMode, conditions, false);
+            if (columnInfo == null) //|| columnInfo.Searchable == false)
+                return null;
+            return ExpressionHelper.BuildColumnConditionExpression(parameterExpression, entityType, columnInfo.PropertyName, columnInfo.PropertyValueType, columnInfo.SearchMode, columnInfo.FilterMode, conditions, false);
         }
 
        protected IEnumerable<UiColumnInfo> GetColumnInfo<TEntity>()

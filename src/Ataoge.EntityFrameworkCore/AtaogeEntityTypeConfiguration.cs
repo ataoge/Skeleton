@@ -16,17 +16,8 @@ namespace Microsoft.EntityFrameworkCore
 
         protected string  ConvertName(string name)
         {
-            if (string.IsNullOrEmpty(name))
-                throw new System.ArgumentNullException(nameof(name));
-
             string providerName = _ataogeDbContext?.ProviderName;
-            switch(providerName)
-            {
-                case "Npgsql.EntityFrameworkCore.PostgreSQL":
-                    return name.ToLower();
-                default:
-                    return name;
-            }
+            return RDFacadeExtensions.ConvertName(providerName, name);
         }
 
         public abstract void Configure(EntityTypeBuilder<TEntity> builder);

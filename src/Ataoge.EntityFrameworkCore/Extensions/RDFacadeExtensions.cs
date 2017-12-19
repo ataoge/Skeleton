@@ -5,6 +5,8 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Ataoge.Data.Entities;
+using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -80,7 +82,7 @@ namespace Microsoft.EntityFrameworkCore
                             continue;
                         }
                         object value = dr[name];
-                        Type pt = pi.DeclaringType;
+                        Type pt = pi.PropertyType;
                         bool nullable = pt.GetTypeInfo().IsGenericType && pt.GetGenericTypeDefinition() == typeof(Nullable<>);
                         if (value == DBNull.Value)
                         {
@@ -142,6 +144,87 @@ namespace Microsoft.EntityFrameworkCore
                 }//while
                 return lst;
             }//using dr */
+        }
+
+        internal static string ConvertName(string providerName, [NotNull] string name)
+        {
+            if (string.IsNullOrEmpty(name))
+                throw new System.ArgumentNullException(nameof(name));
+
+            switch (providerName)
+            {
+                //case "MySql.Data.EntityFrameworkCore":
+                case "Npgsql.EntityFrameworkCore.PostgreSQL":
+                    return name.ToLower();
+                case "Microsoft.EntityFrameworkCore.Sqlite":
+                default:
+                    return name;
+            }
+        }
+
+        internal static bool SupportSpatial(string providerName)
+        {
+            switch (providerName)
+            {
+                case "Npgsql.EntityFrameworkCore.PostgreSQL":
+                    return true;
+                case "Microsoft.EntityFrameworkCore.Sqlite":
+                default:
+                    return false;
+            }
+        }
+
+        public static IEnumerable<TEntity> GetEntityFromSqlQuery<TEntity, TKey>(this DatabaseFacade databaseFacade, Func<TEntity> newFunc,  string sql, params object[] parameters)
+            where TEntity : CommonDataEntity<TKey>
+            where TKey : IEquatable<TKey>
+        {
+            using (DbDataReader dr = databaseFacade.ExecuteSqlQuery(sql, parameters).DbDataReader)
+            {
+                List<TEntity> lst = new List<TEntity>();
+                PropertyInfo[] props = typeof(TEntity).GetTypeInfo().GetProperties(); 
+                IDictionary<string, PropertyInfo> propDicts = props.Where(p => p.CanWrite).ToDictionary(p => ConvertName(databaseFacade.ProviderName,  p.Name));
+                while (dr.Read())
+                {
+                    TEntity t = newFunc();
+                    //IEnumerable<string> actualNames = dr.GetColumnSchema()?.Select(o => o.ColumnName);
+
+                    for(int i=0; i < dr.FieldCount; i++) //foreach(var fieldName in actualNames)
+                    {
+                        var fieldName = dr.GetName(i);
+                        object value = dr[fieldName];
+                        if (propDicts.ContainsKey(fieldName))
+                        {
+                            PropertyInfo pi = propDicts[fieldName];
+                            Type pt = pi.PropertyType;
+                            bool nullable = pt.GetTypeInfo().IsGenericType && pt.GetGenericTypeDefinition() == typeof(Nullable<>);
+                            if (value == DBNull.Value)
+                            {
+                                value = null;
+                            }
+                            if (value == null && pt.GetTypeInfo().IsValueType && !nullable)
+                            {
+                                value = Activator.CreateInstance(pt);
+                            }
+                            if (value.GetType() != pt)
+                            {
+                                value = Convert.ChangeType(value, pt);
+                            }
+                            pi.SetValue(t, value);
+                        }
+                        else
+                        {
+                            if (value == DBNull.Value)
+                            {
+                                value = null;
+                            }
+                            t[fieldName] = value;
+                        }
+                      
+                    }// for i //foreach fieldName
+                    lst.Add(t);
+                }//while
+                return lst;
+            }
         }
        
      }

@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using Ataoge.Data.Entities;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace Ataoge.EntityFrameworkCore.Tests
 {
@@ -28,6 +30,26 @@ namespace Ataoge.EntityFrameworkCore.Tests
          }
 
 
+    }
+
+    public class TestEntity : CommonDataEntity<int>
+    {
+        [JsonExtensionData]
+        private IDictionary<string, object> overrideDcits = new Dictionary<string, object>();
+
+        public override object this[string key]
+        {
+            get 
+            {
+                if (overrideDcits.ContainsKey(key))
+                    return overrideDcits[key];
+                return null;
+            }
+            set
+            {
+                overrideDcits[key] = value;
+            }
+        }
     }
 
     public class Test

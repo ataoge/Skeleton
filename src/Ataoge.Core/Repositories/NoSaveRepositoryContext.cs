@@ -6,6 +6,8 @@ namespace Ataoge.Repositories
 {
     public class NoSaveRepositoryContext : IRepositoryContext
     {
+        public bool SupportSpatial => false;
+
         public int SaveChanges()
         {
             return 0;

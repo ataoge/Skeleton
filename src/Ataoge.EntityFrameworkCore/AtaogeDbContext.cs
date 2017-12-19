@@ -95,17 +95,14 @@ namespace  Ataoge.EntityFrameworkCore
 
         public virtual string ConvertName(string fromEntityName)
         {
-            switch (ProviderName)
-            {
-                //case "MySql.Data.EntityFrameworkCore":
-                case "Npgsql.EntityFrameworkCore.PostgreSQL":
-                    return fromEntityName.ToLower();
-                case "Microsoft.EntityFrameworkCore.Sqlite":
-                default:
-                    return fromEntityName;
-            }
+            return RDFacadeExtensions.ConvertName(ProviderName, fromEntityName);
+        
+        
         }
 
+        public bool SupportSpatial =>  RDFacadeExtensions.SupportSpatial(this.ProviderName);
+
+        
 
         public override int SaveChanges()
         {
@@ -113,7 +110,7 @@ namespace  Ataoge.EntityFrameworkCore
             return base.SaveChanges();
         }
 
-        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
             ApplySafConcepts();
             return await base.SaveChangesAsync(cancellationToken);
@@ -295,6 +292,15 @@ namespace  Ataoge.EntityFrameworkCore
         protected virtual void TriggerDomainEvents(object entityAsObj)
         {
 
+        }
+
+        ///<summary>
+        /// 返回当前几何空间数据的SRID值
+        ///</summary>
+        [DbFunction("ST_SRID")]
+        public static int ST_SRID(byte[] geomset)
+        {
+            throw new NotImplementedException();
         }
         
     }

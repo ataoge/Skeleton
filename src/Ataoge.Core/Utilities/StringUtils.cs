@@ -1,5 +1,6 @@
 using System;
 using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 using JetBrains.Annotations;
 
 namespace Ataoge.Utilities
@@ -104,5 +105,69 @@ namespace Ataoge.Utilities
                 throw new ArgumentNullException(nameof(name));
             return name.ToLower();
         }
+
+        public static bool CheckString(string source, string regStr)
+        {
+            if (string.IsNullOrEmpty(source)) return false;
+            Regex r = new Regex(regStr, RegexOptions.IgnoreCase);
+            Match m = r.Match(source);
+            if (m.Success) return true;
+            else return false;
+        }
+
+        public static bool IsMobilePhone(string value)
+        {
+            return CheckString(value, REG_MOBILEPHONE);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="orgionString"></param>
+        /// <returns></returns>
+        public static string GetDeleteString(string orgionString)
+        {
+            if (string.IsNullOrEmpty(orgionString))
+                throw new ArgumentNullException("参数值为空！");
+
+            //if (orgionString.StartsWith(REG_DELETEMARKER))
+                //return orgionString;
+            Random random = new Random();
+            int delta = random.Next(10000);
+
+            return REG_DELETEMARKER + orgionString + "#" + delta.ToString();
+        }
+
+        public static string GetOrginString(string deleteString)
+        {
+            if (string.IsNullOrEmpty(deleteString))
+                throw new ArgumentNullException("参数值为空！");
+
+
+            if (deleteString.StartsWith(REG_DELETEMARKER))
+            {
+                int index = deleteString.IndexOf('#');
+                if (index > 0)
+                    return deleteString.Substring(1, index - 1);
+                else
+                    return deleteString.TrimStart(REG_DELETEMARKER.ToCharArray());
+            }
+
+            return deleteString;
+        }
+
+        public const string REG_EMAIL = @"^([\w-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\w-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$";  //@"\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*";
+        public const string REG_EMAIL2 = @"\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*";
+        public const string REG_URL = @"http://([\w-]+\.)+[\w-]+(/[\w- ./?%&=]*)?";
+        public const string REG_INCLUDECHINESE = @"[\u4e00-\u9fa5]+";
+        public const string REG_CHINESEONLY = @"^[\u4e00-\u9fa5]+$";
+        public const string REG_PHONE = @"^((\(\d{2,3}\))|(\d{3}\-))?(\(0\d{2,3}\)|0\d{2,3}-)?[1-9]\d{6,7}(\-\d{1,4})?$";
+
+        public const string REG_MOBILEPHONE = "^((\\+86)|(86))?((13[0-9])|(14[5|7])|(15([0-3]|[5-9]))|(18[0,5-9]))\\d{8}$";
+        public const string REG_DATETIME = @"^((((1[6-9]|[2-9]\d)\d{2})-(0?[13578]|1[02])-(0?[1-9]|[12]\d|3[01]))|(((1[6-9]|[2-9]\d)\d{2})-(0?[13456789]|1[012])-(0?[1-9]|[12]\d|30))|(((1[6-9]|[2-9]\d)\d{2})-0?2-(0?[1-9]|1\d|2[0-8]))|(((1[6-9]|[2-9]\d)(0[48]|[2468][048]|[13579][26])|((16|[2468][048]|[3579][26])00))-0?2-29-)) (20|21|22|23|[0-1]?\d):[0-5]?\d:[0-5]?\d$";
+        public const string REG_DELETEMARKER = @"!";
+
+
+
     }
 }

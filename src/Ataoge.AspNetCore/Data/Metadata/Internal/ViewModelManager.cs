@@ -40,6 +40,8 @@ namespace Ataoge.Data.Metadata.Internal
                 columnInfo.Visible = attr.Visible;
                 columnInfo.Searchable = attr.Searchable;
                 columnInfo.SearchMode = attr.SearchMode;
+                columnInfo.Filterable = attr.Filterable;
+                columnInfo.FilterMode = attr.FilterMode;
                 columnInfo.ReferField = attr.ReferField;
                 columnInfo.ReferCondition = attr.ReferCondition;
                 columnInfo.ReferValueFormatMethod = attr.ReferValueFormatMethod;
@@ -66,7 +68,9 @@ namespace Ataoge.Data.Metadata.Internal
                 columnInfo.Visible = columnAttribute != null ? columnAttribute.Visible : true;
                 columnInfo.Orderable = columnAttribute != null ? columnAttribute.Orderable : false;
                 columnInfo.Searchable = columnAttribute != null ? columnAttribute.Searchable : false;
-                columnInfo.SearchMode = columnAttribute != null ? columnAttribute.SearchMode : FilterMode.NormalAnd;
+                columnInfo.SearchMode = columnAttribute != null ? columnAttribute.SearchMode : SearchMode.Normal;
+                columnInfo.Filterable = columnAttribute != null ? columnAttribute.Filterable : false;
+                columnInfo.FilterMode = columnAttribute != null ? columnAttribute.FilterMode : FilterMode.And;
                 columnInfo.ReferField = columnAttribute?.ReferField;
                 columnInfo.ReferCondition = columnAttribute?.ReferCondition;
                 columnInfo.ReferValueFormatMethod = columnAttribute?.ReferValueFormatMethod;

@@ -28,7 +28,10 @@ namespace Ataoge.Data
 
         public bool Searchable {get; set;} = false;
 
-        public FilterMode SearchMode {get; set;}= FilterMode.NormalAnd;
+        public SearchMode SearchMode {get; set;}= SearchMode.NormalAnd;
+
+        public bool Filterable {get; set;} = false;
+        public FilterMode FilterMode {get; set;}= FilterMode.And;
 
         public string ReferField {get; set;} = null;
 
@@ -55,6 +58,7 @@ namespace Ataoge.Data
         {
             base.Visible = false;
             base.Searchable = true;
+            base.Filterable = true;
         }
 
         public string QueryKey {get; set;} = null;

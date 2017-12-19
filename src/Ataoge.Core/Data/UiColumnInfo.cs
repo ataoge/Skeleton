@@ -42,7 +42,11 @@ namespace Ataoge.Data
 
         public bool Searchable {get; set;} = false;
 
-        public FilterMode SearchMode {get; set;}= FilterMode.NormalAnd;
+        public SearchMode SearchMode {get; set;}= SearchMode.NormalAnd;
+
+        public bool Filterable {get; set;} = false;
+        
+        public FilterMode FilterMode {get; set;}= FilterMode.And;
 
         public string ReferField {get; set;} = null;
 
@@ -67,25 +71,38 @@ namespace Ataoge.Data
     }
 
 
-    public enum FilterMode
+    public enum SearchMode
     {
+        Normal = 0x10,
         NormalAnd = 0x10,
 
         NormalOr = 0x11,
 
+        Flag = 0x20,
         FlagAnd = 0x20,
         FlagOr = 0x21,
 
         IntRange = 0x32,
         DateTimeRange = 0x42,
+        DateTimeYear = 0x43,
+        DateTimeMonth = 0x44,
+        DataTimeDay = 0x45,
+        
         NumberRange = 0x52,
+
         StringValue = 0x64,
         
         StringLike = 0x68,
 
+        Contains = 0x70,
         ContainsAnd = 0x70,
 
         ContainsOr = 0x71
+    }
 
+    public enum FilterMode
+    {
+        And = 0,
+        Or = 1
     }
 }
