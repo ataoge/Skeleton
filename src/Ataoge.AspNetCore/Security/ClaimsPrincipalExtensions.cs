@@ -11,7 +11,7 @@ namespace System.Security.Claims
             return principal.Claims.FirstOrDefault(c => c.Type==name)?.Value;
         }
        
-        public static string GetDisplayName(this ClaimsPrincipal principal)
+/*        public static string GetDisplayName(this ClaimsPrincipal principal)
         {
             var claim =principal.Claims.FirstOrDefault(c => c.Type=="displayname");
             if (claim != null)
@@ -28,6 +28,6 @@ namespace System.Security.Claims
         public static string GetUserId(this ClaimsPrincipal principal)
         {
             return GetValue(principal, ClaimTypes.NameIdentifier);
-        }
+        }*/
     }
 }
