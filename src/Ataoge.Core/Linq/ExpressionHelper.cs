@@ -301,11 +301,44 @@ namespace Ataoge.Linq
                                     switch(filterMode)
                                     {
                                         case FilterMode.Or:
-                                             bodyExpression = Expression.OrElse(bodyExpression, Expression.Equal(prpertyExpression, valueExpression));
+                                             bodyExpression = Expression.OrElse(bodyExpression, Expression.GreaterThan(prpertyExpression, valueExpression));
                                              break;
                                         case FilterMode.And:
                                         default:
-                                             bodyExpression = Expression.AndAlso(bodyExpression, Expression.Equal(prpertyExpression, valueExpression));
+                                             bodyExpression = Expression.AndAlso(bodyExpression, Expression.GreaterThan(prpertyExpression, valueExpression));
+                                             break;
+                                    }
+                                }
+                                break;
+
+                        }
+                        break;
+                    case "lt":
+                        switch (searchMode)
+                        {
+                           
+                            case SearchMode.Contains:  
+                           
+                            case SearchMode.ContainsOr:
+                                break;
+                            case SearchMode.NormalOr:
+                            case SearchMode.Normal:
+                            default:
+                                valueExpression = BuildValueExpression(valueType, condition.Value);
+                                if (bodyExpression == null)
+                                {
+                                    bodyExpression = Expression.LessThan(prpertyExpression, valueExpression);
+                                }
+                                else
+                                {
+                                    switch(filterMode)
+                                    {
+                                        case FilterMode.Or:
+                                             bodyExpression = Expression.OrElse(bodyExpression, Expression.LessThan(prpertyExpression, valueExpression));
+                                             break;
+                                        case FilterMode.And:
+                                        default:
+                                             bodyExpression = Expression.AndAlso(bodyExpression, Expression.LessThan(prpertyExpression, valueExpression));
                                              break;
                                     }
                                 }
