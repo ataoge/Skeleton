@@ -1,12 +1,17 @@
 namespace Ataoge.Data
 {
-    public interface IBOEntity : IEntity
+    public interface IExtensionByIndex
     {
         object this[string name]
         {
             get;
             set;
         }
+    }
+
+    public interface IBOEntity : IEntity, IExtensionByIndex
+    {
+        
     }
 
     public interface IBOEntity<TKey> : IEntity<TKey>

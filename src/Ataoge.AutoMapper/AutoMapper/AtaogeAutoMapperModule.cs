@@ -21,6 +21,7 @@ namespace Ataoge.AutoMapper
             services.AddSingleton<HtmlContentValueResolver>();
 
             services.AddSingleton<AtaogeUrlMembarValueResolver>();
+            services.AddSingleton<ClaimExtensionValueResolver>();
         }
 
         protected override void OnConfiguredService(IServiceCollection services)

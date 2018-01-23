@@ -7,6 +7,8 @@ namespace Ataoge.Data
         int RecordFiltered {get; set;}
 
         IList<string> Filters {get; set;}
+
+        string SearchText {get; set;}
     }
 
 }
