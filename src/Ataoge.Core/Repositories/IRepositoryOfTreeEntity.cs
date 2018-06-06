@@ -10,6 +10,10 @@ namespace Ataoge.Repositories
         where TEntity : class
     {
         IQueryable<TEntity> GetAllChildren(Expression<Func<TEntity, bool>> where, bool startQuery = false, string orderBySilbing = null);
+
+        IQueryable<TResult> GetChildrenRecursion<TResult>(Expression<Func<TEntity, bool>> startQuery, Expression<Func<TEntity, TResult>> selector) where TResult : class;
+
+        IQueryable<TResult> GetParents<TResult>(Expression<Func<TEntity, bool>> startQuery, Expression<Func<TEntity, TResult>> selector) where TResult : class;
     }
 
     public interface IRepositoryOfTreeEntity<TEntity, TPrimaryKey> : IRepositoryOfTreeEntity<TEntity>
@@ -26,5 +30,9 @@ namespace Ataoge.Repositories
         IQueryable<TEntity> GetParents(TPrimaryKey id);
 
         List<TEntity> GetParentList(TPrimaryKey id);
+
+        IEnumerable<TPrimaryKey> GetParents(Expression<Func<TEntity, bool>> startQuery);
+
+        IEnumerable<TPrimaryKey> GetChildrenRecursion(Expression<Func<TEntity, bool>> startQuery);
     }
 }

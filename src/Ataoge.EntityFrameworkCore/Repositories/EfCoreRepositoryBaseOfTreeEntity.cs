@@ -6,6 +6,7 @@ using System.Text;
 using Ataoge.Data;
 using Ataoge.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Ataoge.EntityFrameworkCore.Repositories
 {
@@ -17,6 +18,7 @@ namespace Ataoge.EntityFrameworkCore.Repositories
         public EfCoreTreeRepositoryBase(IDbContextProvider<TDbContext> dbContextProvider) : base(dbContextProvider)
         {
             _repositoryHelper = base.Context as IRepositoryHelper;
+            
         }
 
         private IRepositoryHelper _repositoryHelper;
@@ -71,5 +73,37 @@ namespace Ataoge.EntityFrameworkCore.Repositories
                 return EfCoreRepositoryHelper.TreeQuery<TEntity,TPrimaryKey>(_repositoryHelper, Table, entityType, t => t.Id.Equals(id), null, true);
             return EfCoreRepositoryHelper.TreeQuery<TEntity,TPrimaryKey>(_repositoryHelper.ProviderName, Table, entityType, t => t.Id.Equals(id), null, true);
         }
+
+         public IQueryable<TResult> GetParents<TResult>(Expression<Func<TEntity, bool>> startQuery, Expression<Func<TEntity, TResult>> selector)
+            where TResult : class
+         {
+            var entityType = Context.Model.FindEntityType(typeof(TEntity).FullName);
+
+             return EfCoreRepositoryHelper.TreeQuery<TEntity,TPrimaryKey, TResult>(_repositoryHelper, Table, entityType, startQuery, selector,  null, true, null, 0, true);
+        }
+
+         public IEnumerable<TPrimaryKey> GetParents(Expression<Func<TEntity, bool>> startQuery)
+         {
+            var entityType = Context.Model.FindEntityType(typeof(TEntity).FullName);
+            
+             return EfCoreRepositoryHelper.TreeQuery<TEntity,TPrimaryKey>(_repositoryHelper, Table, entityType, startQuery, null, true, null, 0, true).Select(s => s.Id);
+        }
+
+        public IQueryable<TResult> GetChildrenRecursion<TResult>(Expression<Func<TEntity, bool>> startQuery, Expression<Func<TEntity, TResult>> selector)
+            where TResult : class
+        {
+            var entityType = Context.Model.FindEntityType(typeof(TEntity).FullName);
+            return EfCoreRepositoryHelper.TreeQuery<TEntity,TPrimaryKey, TResult>(_repositoryHelper, Table, entityType, startQuery, selector,  null, false, null, 0, true);
+        }
+
+        public IEnumerable<TPrimaryKey> GetChildrenRecursion(Expression<Func<TEntity, bool>> startQuery)
+        {
+            var entityType = Context.Model.FindEntityType(typeof(TEntity).FullName);
+            return EfCoreRepositoryHelper.TreeQuery<TEntity,TPrimaryKey>(_repositoryHelper, Table, entityType, startQuery, null, false, null, 0, true).Select(s => s.Id);
+        }
+
+        
+
+        
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Security.Claims;
 using Ataoge.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -141,6 +142,22 @@ namespace Ataoge.Services
             }
 
             return null;
+        }
+
+        public override string GetUserId()
+        {
+            var user = _httpContextAccessor.HttpContext.User;
+            if (user != null && user.Identity.IsAuthenticated)
+            {
+                var id = user.GetValue("sub");
+                if (string.IsNullOrEmpty(id))
+                {
+                     var claimsIdentity = user.Identity as ClaimsIdentity;
+                    return claimsIdentity?.Claims?.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
+                }
+                return id;
+            }
+            return base.GetUserId();
         }
 
         

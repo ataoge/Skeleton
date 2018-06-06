@@ -2,6 +2,10 @@ namespace Ataoge.Configuration
 {
     public class SettingsOptions
     {
+        public string ApplicationName {get; set;}
+
+        public string ApplicationDisplayName {get; set;}
+        
         public string UploadRootPath {get; set;}
 
         public bool UseAbsoluteUrl {get; set;}

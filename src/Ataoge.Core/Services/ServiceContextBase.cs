@@ -59,5 +59,10 @@ namespace Ataoge.Services
         {
             return defaultValue;
         }
+
+        public virtual string GetUserId()
+        {
+            return null;
+        }
     }
 }

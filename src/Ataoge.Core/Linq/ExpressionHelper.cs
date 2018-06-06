@@ -632,7 +632,86 @@ namespace Ataoge.Linq
             return Expression.Lambda(body, param);
         }
 
+        public static Expression<Func<TEntity, bool>> BuildAuthorizationExpression<TEntity>(Expression<Func<IPermissionAssign, bool>> condition, bool forDeny = false,  string propertyName = "PermissionAssign")
+            where TEntity : IEntity
+        {
+            Type type = typeof(TEntity);
+            ParameterExpression paramExpression = Expression.Parameter(type, "t");
+            var propertyExpression = Expression.Property(paramExpression, propertyName); 
+            Type classType = type.GetProperty(propertyName).PropertyType;
+            classType = classType.GenericTypeArguments[0];
+            Expression anyExpression = Expression.Call(typeof(Enumerable), "Any", new Type[] { classType }, propertyExpression, condition);
+            if (forDeny)
+            {
+                anyExpression = Expression.Not(anyExpression);
+            }
+            return Expression.Lambda<Func<TEntity, bool>>(anyExpression, paramExpression);
+        }
 
+        public static Expression<Func<TEntity, bool>> BuildAuthorizationExpression<TEntity>(IEnumerable<int> roles, int operation, bool forDeny = false,  bool bit = false, string propertyName = "PermissionAssign")
+            where TEntity : IEntity
+        {
+            Expression<Func<IPermissionAssign, bool>> conditionExpression = BuildPermissionExpression(roles, operation, bit, forDeny);
+            return BuildAuthorizationExpression<TEntity>(conditionExpression, forDeny, propertyName);
+        }
+
+        public static Expression BuildAuthorizationExpression(Type type, Expression<Func<IPermissionAssign, bool>> condition, bool forDeny = false, string propertyName = "PermissionAssign")
+        {
+
+            ParameterExpression paramExpression = Expression.Parameter(type, "t");
+            var propertyExpression = Expression.Property(paramExpression, propertyName); 
+            Type classType = type.GetProperty(propertyName).PropertyType;
+            classType = classType.GenericTypeArguments[0];
+            Expression anyExpression = Expression.Call(typeof(Enumerable), "Any", new Type[] { classType }, propertyExpression, condition);
+            if (forDeny)
+            {
+                anyExpression = Expression.Not(anyExpression);
+            }
+            return Expression.Lambda(anyExpression, paramExpression);
+        }
+
+        public static Expression BuildAuthorizationExpression(Type type, IEnumerable<int> roles, int operation, bool forDeny = false, bool bit = false, string propertyName = "PermissionAssign")
+        {
+            Expression<Func<IPermissionAssign, bool>> conditionExpression = BuildPermissionExpression(roles, operation, bit, forDeny);
+            return BuildAuthorizationExpression(type, conditionExpression, forDeny, propertyName);
+        }
+
+        private static Expression<Func<IPermissionAssign, bool>> BuildPermissionExpression(IEnumerable<int> roles, int operation, bool bit = false, bool forDeny = false)
+        {
+           if (forDeny)
+              return BuildDenyPermissionExpression(roles, operation, bit);
+            else
+                return BuildAllowPermissionExpression(roles, operation, bit);
+        }
+        private static Expression<Func<IPermissionAssign, bool>> BuildAllowPermissionExpression(IEnumerable<int> roles, int operation, bool bit = false)
+        {
+            Expression<Func<IPermissionAssign, bool>> conditionExpression = null;
+            if (bit)
+            {
+                conditionExpression = p => roles.Contains(p.RoleId)  && (p.Operation & operation) == operation; 
+            }
+            else
+            {
+                conditionExpression = p => roles.Contains(p.RoleId)  && p.Operation == operation; 
+            }
+            return conditionExpression;
+        }
+
+        private static Expression<Func<IPermissionAssign, bool>> BuildDenyPermissionExpression(IEnumerable<int> roles, int operation, bool bit = false)
+        {
+            Expression<Func<IPermissionAssign, bool>> conditionExpression = null;
+            if (bit)
+            {
+                conditionExpression = p => roles.Contains(p.RoleId) && (p.IsRefused & operation) == operation; 
+            }
+            else
+            {
+                conditionExpression = p => roles.Contains(p.RoleId) && p.IsRefused == operation; 
+            }
+            return conditionExpression;
+        }
 
     }
+
+   
 }

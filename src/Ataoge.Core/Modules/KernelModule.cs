@@ -1,5 +1,7 @@
 using System;
+using System.Linq;
 using Ataoge.Application.Navigation;
+using Ataoge.BackgroundJobs;
 using Ataoge.Configuration;
 using Ataoge.Infrastructure;
 using Ataoge.Repositories;
@@ -34,6 +36,9 @@ namespace Ataoge.Modules
                 services.AddSingleton(typeof(ISafSession<>).MakeGenericType(keyType), typeof(ClaimsSafSession<>).MakeGenericType(keyType));
              }
              services.TryAddSingleton<Infrastructure.INavigationConfiguration>(coreOptionsExtension.NavigationConfiguration);
+
+            //添加后台队列
+             services.AddBackgroundQueue();
         }
 
 
@@ -46,6 +51,14 @@ namespace Ataoge.Modules
             //services.AddSingleton<IMultiTenancyConfig, MultiTenancyConfig>();
             
             services.TryAddScoped<IRepositoryManager, RepositoryManager>();
+
+            //注册BackgroudQueueConfig;
+            var backgroundQueueConfigType = typeof(BackgroundQueueConfig);
+            if (!services.Any(x => x.ServiceType == backgroundQueueConfigType))
+            {
+                services.TryAddSingleton(backgroundQueueConfigType);
+            }
+
         }
 
         protected override void OnInitilize(IServiceProvider serviceProvider)

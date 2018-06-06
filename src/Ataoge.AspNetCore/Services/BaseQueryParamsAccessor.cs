@@ -29,6 +29,28 @@ namespace Ataoge.Services
             return defaultValue;
         }
 
+        public bool GetBoolParam(string name, bool defaultValue = false)
+        {
+            if (_httpContextAccessor.HttpContext.Request.Query.ContainsKey(name))
+            {
+                bool returnValue;
+                if (bool.TryParse(_httpContextAccessor.HttpContext.Request.Query[name], out returnValue))
+                    return returnValue;
+            }
+            return defaultValue;
+        }
+
+        public double GetDoubleParam(string name, double defaultValue = 0.0)
+        {
+            if (_httpContextAccessor.HttpContext.Request.Query.ContainsKey(name))
+            {
+                double returnValue;
+                if (double.TryParse(_httpContextAccessor.HttpContext.Request.Query[name], out returnValue))
+                    return returnValue;
+            }
+            return defaultValue;
+        }
+
         public int[] GetIntArrayParam(string name)
         {
             if (_httpContextAccessor.HttpContext.Request.Query.ContainsKey(name))

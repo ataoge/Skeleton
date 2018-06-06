@@ -41,8 +41,10 @@ namespace Ataoge.EntityFrameworkCore.Tests
             {
      
                 Expression<Func<SequencesRule, bool>>  aaa = BuildLamdaExpression<SequencesRule>("PatternName eq aaa", bb) as Expression<Func<SequencesRule, bool>> ;
-                var query = dbContext.Set<SequencesRule>().Where(aaa).OrderBy(GetPropertyExpression<SequencesRule>("PatternName"));
-                string aa = query.ToSql(true);
+                var query = dbContext.Set<SequencesRule>();//.Where(aaa).OrderBy(GetPropertyExpression<SequencesRule>("PatternName"));
+                int vv = 10;
+                var exss = new string[] {"bb", "cc"};//
+                var aa = query.Where(t => t.MaxValue > vv && exss.Contains(t.PatternName)).ToSql(true);
                 var result =query.ToList();
 
             }

@@ -11,7 +11,7 @@ namespace Ataoge.Services
 
         ILogger Logger {get;}
 
-         string ClientIpAddress { get;}
+        string ClientIpAddress { get;}
         
         string GetStringParam(string name, string defaultValue = null);
 
@@ -28,6 +28,8 @@ namespace Ataoge.Services
         string[] GetStringArrayForm(string name);
 
         int[] GetIntArrayForm(string name);
+
+        string GetUserId();
 
     }
 }

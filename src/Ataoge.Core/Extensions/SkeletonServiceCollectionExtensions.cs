@@ -10,6 +10,7 @@ namespace Microsoft.Extensions.DependencyInjection
             where TStartupModule : ModuleBase
         {
             var optionsBuilder = new SkeletonOptionsBuilder();
+            optionsBuilder.Services = services;
 
             optionsAction(optionsBuilder); 
 

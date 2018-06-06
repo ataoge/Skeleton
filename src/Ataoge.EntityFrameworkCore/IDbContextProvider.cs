@@ -9,5 +9,6 @@ namespace Ataoge.EntityFrameworkCore
         TDbContext GetDbContext();
 
         TDbContext GetDbContext(MultiTenancySides? multiTenancySide );
+
     }
 }

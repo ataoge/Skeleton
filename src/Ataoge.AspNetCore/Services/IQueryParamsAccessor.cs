@@ -6,6 +6,10 @@ namespace Ataoge.Services
 
         string GetStringParam(string name, string defaultValue = null);
 
+        bool GetBoolParam(string name, bool defaultValue = false);
+
+        double GetDoubleParam(string name, double defaultValue = 0.0);
+
         string GetClientIpAddress();
         //int GetPageIndex(int defaultValue = 0);
 

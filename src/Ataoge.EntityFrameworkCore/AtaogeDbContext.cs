@@ -302,6 +302,30 @@ namespace  Ataoge.EntityFrameworkCore
         {
             throw new NotImplementedException();
         }
+
+        [DbFunction("ST_Contains")]
+        public static bool ST_Contains(byte[] blogId, byte[] byte2)
+        {
+            throw new NotImplementedException();
+        }
+
+        [DbFunction("ST_GeomFromText")]
+        public static byte[] ST_GeomFromText(string value, int srid)
+        {
+            throw new Exception();
+        }
+
+        [DbFunction("ST_Buffer")]
+        public static byte[] ST_Buffer(byte[] geom, double degree, int pts = 8)
+        {
+            throw new NotImplementedException();
+        }
+
+        [DbFunction("ST_DWithin")]
+        public static bool ST_DWithin(byte[] geom1, byte[] geom2, double distance)
+        {
+            throw new NotImplementedException();
+        }
         
     }
 }

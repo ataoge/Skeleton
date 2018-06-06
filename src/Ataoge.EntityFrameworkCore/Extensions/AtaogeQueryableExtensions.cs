@@ -38,6 +38,8 @@ namespace System.Linq
 
         public static string ToSql<TEntity>(this IQueryable<TEntity> query, bool useParameters = false) where TEntity : class
         {
+            if (useParameters)
+                return GetSqlTextWithParement(query).Sql;
             var selectExpression = GetSelect(query, useParameters);
             return selectExpression?.ToString();
             //return sql;
@@ -99,7 +101,9 @@ namespace System.Linq
             var modelVisitor = (RelationalQueryModelVisitor)queryCompilationContext.CreateQueryModelVisitor();
             modelVisitor.CreateQueryExecutor<TEntity>(queryModel);
 
-            string sql =  modelVisitor.Queries.First().ToString();
+            var selectExpression = modelVisitor.Queries.First();
+            string sql  = selectExpression.CreateDefaultQuerySqlGenerator().GenerateSql(queryContext.ParameterValues).CommandText;
+            //string sql =  modelVisitor.Queries.First().ToString();
             return new SqlWithParameters() {Sql = sql, Parameters = queryContext.ParameterValues?.ToDictionary(k => k.Key, v => v.Value)};
         }
     }

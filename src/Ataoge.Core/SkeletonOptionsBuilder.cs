@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Ataoge.Infrastructure;
 using JetBrains.Annotations;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Ataoge
 {
@@ -66,6 +67,8 @@ namespace Ataoge
 
             return this;
         }
+
+        internal IServiceCollection Services {get; set;}
 
     }
 }
