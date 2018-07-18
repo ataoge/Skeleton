@@ -1,6 +1,6 @@
 namespace Ataoge.GisCore.Geometry
 {
-    public class EsriExtent : IEsriGeometry
+    public class EsriExtent :  EsriGeometry
     {
         public double XMin {get; set;}
 
@@ -10,7 +10,7 @@ namespace Ataoge.GisCore.Geometry
 
         public double YMax {get; set;}
 
-        public SpatialReference SpatialReference {get; set;}
+        //public SpatialReference SpatialReference {get; set;}
 
     }
 
