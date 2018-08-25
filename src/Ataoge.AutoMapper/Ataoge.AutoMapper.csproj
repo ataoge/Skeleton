@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="6.1.1" />
+    <PackageReference Include="AutoMapper" Version="7.0.1" />
     <PackageReference Include="Ataoge.Core" Version="2.0.0" />
   </ItemGroup>
 </Project>
