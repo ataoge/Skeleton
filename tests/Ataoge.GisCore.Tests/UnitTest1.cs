@@ -1,7 +1,14 @@
-using System;
+ using System;
 using Xunit;
 using Newtonsoft.Json;
 using System.Globalization;
+using Ataoge.GisCore.Geometry;
+using Ataoge.GisCore.Geometry.Converters;
+using System.Collections.Generic;
+using Ataoge.GisCore.Features;
+using Newtonsoft.Json.Serialization;
+using System.Reflection;
+using System.Runtime.Serialization;
 
 namespace Ataoge.GisCore.Tests
 {
@@ -17,6 +24,164 @@ namespace Ataoge.GisCore.Tests
             string colorstring = JsonConvert.SerializeObject(test);
             //EsriColor color2 = JsonConvert.DeserializeObject<EsriColor>(colorstring);
         }
+
+        [Fact]
+        public void TestGeoJson()
+        {
+            Point pt1 = new Point(100,100);
+            Point pt2 = new Point(200,200);
+            Point pt3 = new Point(300,300);
+            MultiPoint pts = new MultiPoint();
+            pts.Geometries.Add(pt1);
+            pts.Geometries.Add(pt2);
+            pts.Geometries.Add(pt3);
+
+            
+
+            var testDto1 = new TestDto(){Id = 1, Geometry = pt1, Name = "MyName"};
+            var feature1 = new Feature<TestDto>(testDto1);
+
+            var testDto2 = new TestDto(){Id = 2, Geometry = pt2, Name = "MyName2"};
+            var feature2 = new Feature<TestDto>(testDto2);
+            JsonSerializerSettings geoJsonSetting = new JsonSerializerSettings() {
+                ContractResolver = FeatuerGeometryResolver.Instance
+                
+            };
+            //geoJsonSetting.Converters.Add(new GeometryConverter());
+
+            //var jsonPt = JsonConvert.SerializeObject(pt1, geoJsonSetting);
+        var features = new FeatureCollection<TestDto>(new List<Feature<TestDto>>() {feature1, feature2});
+           var json = JsonConvert.SerializeObject(features, geoJsonSetting);
+            
+
+            LineString lineString = new LineString(pts.Geometries);
+            var jsonLineString = JsonConvert.SerializeObject(lineString, new GeometryConverter());
+
+            var externRing = new List<Point>() {
+               new Point(100.0, 0.0), 
+               new Point(101.0, 0.0), 
+               new Point(101.0, 1.0), 
+               new Point(100.0, 1.0),
+               new Point(100.0, 0.0)
+            };
+
+             var holeRing = new List<Point>() {
+               new Point(100.2, 0.2), 
+               new Point(100.8, 0.2), 
+               new Point(100.8, 0.8), 
+               new Point(100.2, 0.8),
+               new Point(100.2, 0.2)
+            };
+            
+            Polygon polygon = new Polygon(externRing);
+            polygon.InteriorRings.Add(new LinearRing(holeRing));
+            var jsonPloygon = JsonConvert.SerializeObject(polygon, new GeometryConverter());
+        }
+
+        [Fact]
+        public void TestJsonExpandData()
+        {
+            var jsonSettings = new JsonSerializerSettings()
+            {
+                ContractResolver = new UniversalEntitySerializeContractResolver()
+            };
+            var data = new TestExpandData() {Id = 1, Name ="My"};
+
+            var json = JsonConvert.SerializeObject(data, jsonSettings);
+            data["DateTime"] = DateTime.Now;
+            data["Double"] = 22.223;
+            json = JsonConvert.SerializeObject(data, jsonSettings);
+
+            var data1 = JsonConvert.DeserializeObject<TestExpandData>(json);
+            var aa = data1["DateTime"];
+            var bb = data1["Double"];
+        }
+    }
+
+    public class UniversalEntitySerializeContractResolver : CamelCasePropertyNamesContractResolver
+    {
+       //public static readonly UniversalEntitySerializeContractResolver Instance = new UniversalEntitySerializeContractResolver();
+ 
+        protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
+        {
+             JsonProperty property = base.CreateProperty(member, memberSerialization);
+ 
+            if (member.Name == "DateTime") 
+            {
+                //property.PropertyName = Ataoge.Utilities.StringUtils.ToCamelCase(property.PropertyName);
+            }
+          return property;
+        }
+    }
+
+        
+    public class TestClass
+    {
+        public int Id {get; set;}
+
+        public string Name {get; set;}
+
+        public DateTime DateTime {get; set;}
+    }
+
+
+    public class TestExpandData
+    {
+        public TestExpandData()
+        {
+            ExtensionData = new Dictionary<string, object>();
+        }
+
+        public int Id {get; set;}
+
+        public string Name {get; set;}
+
+        public object this[string name]
+        {
+            get 
+            {
+                name = ToCamelCase(name);
+                if (ExtensionData.ContainsKey(name))
+                    return ExtensionData[name];
+                return null;
+            }
+            set 
+            {
+                if (value != null)
+                {
+                    name = ToCamelCase(name);
+                    ExtensionData[name] = value;
+                }
+            }
+        }
+
+        public static string ToCamelCase(string s)
+        {
+            if (string.IsNullOrEmpty(s) || !char.IsUpper(s[0]))
+            {
+                return s;
+            }
+
+            char[] chars = s.ToCharArray();
+            chars[0] = char.ToLowerInvariant(chars[0]);
+            return new string(chars);;
+        }
+
+        [JsonExtensionData]
+        private IDictionary<string, object> ExtensionData {get; set;}
+
+        [OnDeserialized]
+        private void OnDeserialized(StreamingContext context)
+        {
+        }
+    }
+
+    public class TestDto : IHasGeometryWithId
+    {
+        public int Id { get; set ; }
+        public IGeometry Geometry { get; set; }
+
+        public string Name {get; set;}
     }
 
     public class TestSymbol

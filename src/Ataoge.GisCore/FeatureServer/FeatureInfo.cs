@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Ataoge.GisCore.Geometry;
+using Newtonsoft.Json;
 
 namespace Ataoge.GisCore.FeatureServer
 {
@@ -21,6 +22,39 @@ namespace Ataoge.GisCore.FeatureServer
         public IGeometry Geometry {get; set;}
 
         
+    }
+
+    public interface IEsriTable : IHasGeometry
+    {
+        int Id {get; set;}
+        string GlobalId {get; set;}
+
+    }
+
+    public class FeatureInfo<TEsriTable> : IFeatureInfo
+        where TEsriTable : IEsriTable
+    {
+        public FeatureInfo(TEsriTable esriTable)
+        {
+
+        }
+
+        [JsonProperty("geometries", Required = Required.Always)]
+        //[JsonConverter(typeof(GeometryConverter))]
+        public IGeometry Geometry 
+        {
+            get 
+            {
+                return Attributes.Geometry;
+            }
+            set 
+            {
+                Attributes.Geometry = value;
+            }
+        }
+
+        [JsonProperty("attributes", Required = Required.Always)]
+        public TEsriTable Attributes {get; set;}
     }
 
    
