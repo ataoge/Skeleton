@@ -1,17 +1,21 @@
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+
 namespace Ataoge.GisCore.FeatureServer
 {
     public class BaseFieldInfo
     {
         public string Name {get; set;}
 
-        public string Type {get; set;} = "esriFieldTypeString";
+        [JsonConverter(typeof(StringEnumConverter))]
+        public EsriFieldType Type {get; set;} = EsriFieldType.esriFieldTypeString;
 
         public string Alias {get; set;}
 
         public int Length {get; set;} = 0;
     }
 
-     public class FieldInfo : BaseFieldInfo
+    public class FieldInfo : BaseFieldInfo
     {
        
         

@@ -32,11 +32,11 @@ namespace Ataoge.GisCore.FeatureServer
     }
 
     public class FeatureInfo<TEsriTable> : IFeatureInfo
-        where TEsriTable : IEsriTable
+        where TEsriTable : IHasGeometry
     {
         public FeatureInfo(TEsriTable esriTable)
         {
-
+            Attributes = esriTable;
         }
 
         [JsonProperty("geometries", Required = Required.Always)]
