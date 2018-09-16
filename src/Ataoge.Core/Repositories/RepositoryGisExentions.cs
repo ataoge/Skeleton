@@ -1,20 +1,11 @@
-using System;
 using System.Linq;
 using Ataoge.Data;
-using Ataoge.Repositories;
 using Ataoge.Utilities;
-using Microsoft.EntityFrameworkCore;
 
-namespace Ataoge.EntityFrameworkCore.Repositories
+namespace Ataoge.Repositories
 {
-    ///<summary>
-    /// 该类已废弃
-    ///</summary>
-    [Obsolete("用RespositoryGisExtentions方法替代")]
-    public static class EfCoreRepositoryExentions
+    public static class RepositoryGisExtensions
     {
-        private const string V = "";
-
         public static IQueryable<TEntity> AddExtentFilter<TEntity>(this IRepository<TEntity> repository,  IQueryable<TEntity> query, string geom,  int srid = 4326, int dbSrid = 4326, string spatialRelationShip = null)
             where TEntity : class, IEntity, IHasEwkb
         {
@@ -62,16 +53,6 @@ namespace Ataoge.EntityFrameworkCore.Repositories
             }
           
             return query.Where(t => Ataoge.Utilities.GisFunctions.ST_DWithin(Ataoge.Utilities.GisFunctions.ST_GeomFromText(geom, srid), t.Shape, buffer));
-        }
-
-        public static string ConverNameToDb(this IRepository repository, string name)
-        {
-            IRepositoryHelper helper = repository.RepositoryContext as IRepositoryHelper;
-            if (helper!=null)
-            {
-               return RDFacadeExtensions.ConvertName(helper.ProviderName, name);
-            }
-            return name;
         }
     }
 }

@@ -294,6 +294,7 @@ namespace  Ataoge.EntityFrameworkCore
 
         }
 
+        /* 
         ///<summary>
         /// 返回当前几何空间数据的SRID值
         ///</summary>
@@ -326,6 +327,6 @@ namespace  Ataoge.EntityFrameworkCore
         {
             throw new NotImplementedException();
         }
-        
+        */
     }
 }
