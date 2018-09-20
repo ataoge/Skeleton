@@ -39,7 +39,7 @@ namespace Ataoge.GisCore.FeatureServer
             Attributes = esriTable;
         }
 
-        [JsonProperty("geometries", Required = Required.Always)]
+        [JsonProperty("geometry", Required = Required.Always)]
         //[JsonConverter(typeof(GeometryConverter))]
         public IGeometry Geometry 
         {

@@ -8,6 +8,7 @@ using Ataoge.EntityFrameworkCore.ModelConfiguration.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace Ataoge.EntityFrameworkCore.Tests
@@ -17,6 +18,37 @@ namespace Ataoge.EntityFrameworkCore.Tests
         public UnitTest1()
         {
 
+        }
+
+        [Fact]
+        public void TestRawSql()
+        {
+            IServiceCollection services = new ServiceCollection();
+
+            services.AddSingleton<ILoggerFactory, LoggerFactory>();
+            
+            services.AddDbContext<TestDbContext>(options => {
+                options.UseSqlite("Data Source=test.db");
+                options.AddEntityTypeConfigurations();
+                
+            });
+
+            IServiceProvider sp = services.BuildServiceProvider();
+            var loggerFactory = sp.GetService<ILoggerFactory>();
+            loggerFactory.AddConsole(LogLevel.Debug);
+            //loggerFactory.AddDebug();
+
+     
+            using(var dbContext = sp.GetService<TestDbContext>())
+            {
+                var aa = dbContext.Set<Test>().Where(t => t.Id == 1).ToArray();
+                var bb = dbContext.Set<Test>().FromSql("select * from test1").ToArray();
+                var cc = dbContext.Set<Test>().Select(t => t.Name).FromSql("select name from test1").ToArray();
+                var ee = dbContext.Set<Test>().FromSql("select * from test1").Where(t => t.Id == 1).ToArray();
+                //error
+                //var dd =  dbContext.Set<Test>().FromSql("select name from test1").ToArray();//.Select(t => t.Name).ToArray();
+                
+            }
         }
 
         [Fact]

@@ -33,7 +33,7 @@ namespace Ataoge.GisCore.Features
         [JsonProperty("type", Required = Required.Always)]
         public string Type {get; set;} = "Feature";
 
-        [JsonProperty("geometries", Required = Required.Always)]
+        [JsonProperty("geometry", Required = Required.Always)]
         [JsonConverter(typeof(GeometryConverter))]
         public IGeometry Geometry
         {

@@ -3,6 +3,7 @@ using Esri = Ataoge.GisCore.FeatureServer;
 using System.Reflection;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace Ataoge.GisCore.Utilities
 {
@@ -19,7 +20,7 @@ namespace Ataoge.GisCore.Utilities
                     continue;
                 }
                 var fieldInfo = new Esri.FieldInfo();
-                fieldInfo.Name = propertyInfo.Name.ToCamelCase();
+                fieldInfo.Name = GetJsonNameByProperty(propertyInfo);
                 fieldInfo.Alias = fieldInfo.Name;
                 fieldInfo.Domain = null;
                 fieldInfo.Type = GetEsriFieldTypeForProperty(propertyInfo);
@@ -40,10 +41,20 @@ namespace Ataoge.GisCore.Utilities
                         break;
                 }
 
-                fieldInfos.Add(fieldInfo);
+                if (fieldInfo.Type != EsriFieldType.esriFieldTypeUnsupport)
+                    fieldInfos.Add(fieldInfo);
             }
 
             return fieldInfos.ToArray();
+        }
+
+        private static string GetJsonNameByProperty(PropertyInfo property)
+        {
+            Newtonsoft.Json.JsonPropertyAttribute attr = (JsonPropertyAttribute)Attribute.GetCustomAttribute(property, typeof(JsonPropertyAttribute));
+            if (attr != null)
+                return attr.PropertyName;
+            else    
+                return property.Name.ToCamelCase();
         }
 
         public static Esri.BaseFieldInfo[] BuildBaseFieldInfosFromType(Type type)
@@ -56,8 +67,9 @@ namespace Ataoge.GisCore.Utilities
                 {
                     continue;
                 }
+                
                 var fieldInfo = new Esri.BaseFieldInfo();
-                fieldInfo.Name = propertyInfo.Name.ToCamelCase();
+                fieldInfo.Name = GetJsonNameByProperty(propertyInfo);
                 fieldInfo.Alias = fieldInfo.Name;
                 fieldInfo.Type = GetEsriFieldTypeForProperty(propertyInfo);
                 switch(fieldInfo.Type)
@@ -68,8 +80,9 @@ namespace Ataoge.GisCore.Utilities
                     default:
                         break;
                 }
-
-                fieldInfos.Add(fieldInfo);
+                
+                if (fieldInfo.Type != EsriFieldType.esriFieldTypeUnsupport)
+                    fieldInfos.Add(fieldInfo);
             }
 
             return fieldInfos.ToArray();
@@ -85,6 +98,11 @@ namespace Ataoge.GisCore.Utilities
             switch (flags)
             {
                 case 0:
+                    var propertyInfo = type.GetProperties().FirstOrDefault(p => p.Name.Equals("Id", StringComparison.InvariantCultureIgnoreCase));
+                    if (propertyInfo != null)
+                    {
+                        return GetJsonNameByProperty(propertyInfo);
+                    }
                     return "id";
                 case 1:
                     if (type.GetProperties().FirstOrDefault(p => p.Name.Equals("GlobalId", StringComparison.InvariantCultureIgnoreCase)) != null)
@@ -106,7 +124,7 @@ namespace Ataoge.GisCore.Utilities
             switch(typeCode)
             {
                 case TypeCode.Boolean:
-                    return EsriFieldType.esriFieldTypeSmallInteger;
+                    return EsriFieldType.esriFieldTypeUnsupport;
                 case TypeCode.String:
                     if (propertyInfo.Name.Equals("globalid", StringComparison.InvariantCultureIgnoreCase))
                     {
@@ -119,14 +137,17 @@ namespace Ataoge.GisCore.Utilities
                         return EsriFieldType.esriFieldTypeOID;
                     }
                     return EsriFieldType.esriFieldTypeInteger; 
+                case TypeCode.Int16:
+                    return EsriFieldType.esriFieldTypeSmallInteger;
                 case TypeCode.DateTime:
                     return EsriFieldType.esriFieldTypeDate;
                 case TypeCode.Single:
                     return EsriFieldType.esriFieldTypeSingle;
                 case TypeCode.Double:
                     return EsriFieldType.esriFieldTypeDouble;
+                
                 default:
-                    return EsriFieldType.esriFieldTypeString;
+                    return EsriFieldType.esriFieldTypeUnsupport;
             }
         }
 

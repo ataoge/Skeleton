@@ -27,6 +27,12 @@ namespace Ataoge.EntityFrameworkCore.Tests
          {
             
              base.OnModelCreating(modelBuilder);
+
+             var eb = modelBuilder.Entity<Test>();
+             eb.HasKey( t => t.Id);
+             eb.Property(t => t.Id);
+             eb.Property(t => t.Name);
+             eb.ToTable("${Test}");
          }
 
 
@@ -55,6 +61,8 @@ namespace Ataoge.EntityFrameworkCore.Tests
     public class Test
     {
         public int Id {get; set;}
+
+        public string Name {get; set;}
     }
 
     public class TestA 

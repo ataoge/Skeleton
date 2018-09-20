@@ -7,6 +7,7 @@ namespace Ataoge.GisCore.FeatureServer
     {
         public string Name {get; set;}
 
+        [JsonProperty(DefaultValueHandling=DefaultValueHandling.Include)]
         [JsonConverter(typeof(StringEnumConverter))]
         public EsriFieldType Type {get; set;} = EsriFieldType.esriFieldTypeString;
 
