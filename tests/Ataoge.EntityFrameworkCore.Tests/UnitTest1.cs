@@ -117,6 +117,44 @@ namespace Ataoge.EntityFrameworkCore.Tests
 
         }
 
+        [Fact]
+        public void TestAuthSQL()
+        {
+             IServiceCollection services = new ServiceCollection();
+
+            services.AddSingleton<ILoggerFactory, LoggerFactory>();
+            
+            services.AddDbContext<TestDbContext>(options => {
+                options.UseSqlite("Data Source=test.db");
+                options.AddEntityTypeConfigurations();
+                
+            });
+
+            IServiceProvider sp = services.BuildServiceProvider();
+            var loggerFactory = sp.GetService<ILoggerFactory>();
+            loggerFactory.AddConsole(LogLevel.Debug);
+            //loggerFactory.AddDebug();
+
+     
+            using(var dbContext = sp.GetService<TestDbContext>())
+            {
+                IQueryable<Test> query = dbContext.Set<Test>();
+                //var aa = dbContext.ResourcePermissionAssign;
+                //query = AddAuth(query, aa, 1);
+                int[] ids = new int[]{1,2};
+                query = query.Where(t => t.ResourcePermissionAssigns.Any(d => ids.Contains(d.RoleId) && d.Operation > 0)).Where(t => !t.ResourcePermissionAssigns.Any(d => ids.Contains(d.RoleId) && d.Operation > 0));
+                var bb = query.Take(5).ToArray();
+            }
+
+        }
+
+        private IQueryable<Test> AddAuth(IQueryable<Test> query, IQueryable<ResourcePermissionAssign> permissionAssigns, params int[] roles)
+        {
+            var notids = permissionAssigns.Where(t => roles.Contains(t.RoleId) && t.ResourceType =="test" && t.IsRefused > 0).Select(t => t.ResourceId);
+            var ids = permissionAssigns.Where(t => roles.Contains(t.RoleId) && t.ResourceType =="test").Select(t => t.ResourceId);
+            return query.Where(t => !notids.Contains(t.Id) &&  ids.Contains(t.Id));
+        }
+
        
 
         private void TestExpr<TEntity>(Expression< Func<TEntity, bool>> bbb)

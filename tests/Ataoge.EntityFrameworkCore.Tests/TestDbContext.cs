@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Ataoge.Data;
 using Ataoge.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -7,6 +8,7 @@ namespace Ataoge.EntityFrameworkCore.Tests
 {
     public class TestDbContext  : AtaogeDbContext
     {
+        //public DbSet<ResourcePermissionAssign> ResourcePermissionAssign {get; set;}
         public TestDbContext(DbContextOptions<TestDbContext> options) : base (options)
         {
 
@@ -32,11 +34,34 @@ namespace Ataoge.EntityFrameworkCore.Tests
              eb.HasKey( t => t.Id);
              eb.Property(t => t.Id);
              eb.Property(t => t.Name);
-             eb.ToTable("${Test}");
+             eb.ToTable(nameof(Test));
+
+             eb.HasMany(t => t.ResourcePermissionAssigns).WithOne().HasForeignKey(t => t.ResourceId);
+            // eb.ToTable("${Test}");
          }
 
 
     }
+
+   public class ResourcePermissionAssign :  IEntity<int>
+   {
+       
+        public int Id {get; set;}
+
+    
+        public int ResourceId {get;set;}
+
+        public int RoleId {get; set;}
+
+        public string ResourceType {get; set;}
+
+        public int Operation {get; set;}
+
+        public int IsRefused {get; set;}
+
+       // public BasePermissionAssign Base {get; set;}
+
+   }
 
     public class TestEntity : CommonDataEntity<int>
     {
@@ -63,6 +88,8 @@ namespace Ataoge.EntityFrameworkCore.Tests
         public int Id {get; set;}
 
         public string Name {get; set;}
+
+        public virtual ICollection<ResourcePermissionAssign> ResourcePermissionAssigns {get; set;}
     }
 
     public class TestA 
