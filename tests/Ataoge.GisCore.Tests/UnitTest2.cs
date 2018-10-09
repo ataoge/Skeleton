@@ -105,7 +105,7 @@ namespace Ataoge.GisCore.Tests
             double lat;
             double lon;
             MapXYToLatLon(x, y, out lon, out lat);
-            //WH2000ToBL(407889.6354,3245942.418, out lon, out lat);
+            WH2000ToBL(795761.0955,380570.6057, out lon, out lat);
             WH54ToBL(461574.705, 3271333.382, out lon, out lat);
             MapXYToLatLon(461574.705, 3271333.382, out lat, out lon);
         }
