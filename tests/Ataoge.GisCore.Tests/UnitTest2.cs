@@ -61,6 +61,40 @@ namespace Ataoge.GisCore.Tests
         }
 
         [Fact]
+        public void TestSuperCluster()
+        {
+            int max = 1000000;
+            var pts = new Point[max];
+            var random = new Random();
+            for (var i = 0; i < max; i++)
+            {
+                var pt = new Point();
+                pt.X = random.Next(-180000, 180000) * 0.001;
+                pt.Y = random.Next(-90000, 90000) * 0.001;
+                pts[i] = pt;
+            }
+
+             Stopwatch sp = new Stopwatch();
+            sp.Start();
+            var superCluster = new SuperCluster();
+            superCluster.Load(pts);
+             sp.Stop();
+            Console.WriteLine($"初始化数据耗时：{sp.ElapsedMilliseconds}");
+
+            sp.Start();
+            var result = superCluster.GetClusters(-180, -90, 180, 90, 0);
+            foreach(var point in result)
+            {
+                if (point is PointEx)
+                {
+                    
+                }
+            }
+            sp.Stop();
+            Console.WriteLine($"查询数据耗时：{sp.ElapsedMilliseconds}");
+        }
+
+        [Fact]
         public void TestWHCoord()
         {
             double x;

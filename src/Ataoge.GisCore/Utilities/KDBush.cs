@@ -3,7 +3,15 @@ using System.Collections.Generic;
 
 namespace Ataoge.GisCore.Utilities
 {
-    public class Point
+
+    public interface IPoint
+    {
+        double X {get;}
+
+        double Y {get;}
+        
+    }
+    public class Point : IPoint
     {
         public double X {get; set;}
 
@@ -11,8 +19,9 @@ namespace Ataoge.GisCore.Utilities
     }
     public class KDBush
     {
-        public KDBush(Point[] points)
+        public KDBush(IPoint[] points)
         {
+            this.points = points;
             ids = new int[points.Length];
             coords = new double[points.Length * 2];
 
@@ -23,6 +32,9 @@ namespace Ataoge.GisCore.Utilities
                 coords[2*i +1] =points[i].Y;
             }
         }
+
+        private IPoint[] points;
+        public IPoint[] Points {get {return this.points;}}
 
         private int[] ids;
         private double[] coords;
