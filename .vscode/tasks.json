@@ -15,6 +15,14 @@
             "problemMatcher": "$msCompile"
         },
         {
+            "taskName": "build AspNetCore",
+            "args": ["build", "${workspaceRoot}/src/Ataoge.AspNetCore/Ataoge.AspNetCore.csproj" ],
+            "suppressTaskName": true,
+            "isBuildCommand": true,
+            "showOutput": "silent",
+            "problemMatcher": "$msCompile"
+        },
+        {
             "taskName": "buildEftest",
             "args": ["build", "${workspaceRoot}/tests/Ataoge.EntityFrameworkCore.Tests/Ataoge.EntityFrameworkCore.Tests.csproj" ],
             "suppressTaskName": true,

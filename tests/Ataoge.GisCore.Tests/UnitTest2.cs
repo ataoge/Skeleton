@@ -201,7 +201,7 @@ namespace Ataoge.GisCore.Tests
         /// <param name="projNo">如果X坐标包含带号，则本参数可选</param>
         public static void WH2000ToBL(double X, double Y, out double longitude, out double latitude, int zoneWide = 6, int projNo = 0)
         {
-            int ProjNo; //int ZoneWide; ////带宽
+            //int ProjNo; //int ZoneWide; ////带宽
 
             double longitude1, latitude1, longitude0, X0, Y0, xval, yval;//latitude0,
             double e1, e2, f, a, ee, NN, T, C, M, D, R, u, fai, iPI;
