@@ -74,6 +74,7 @@ namespace Microsoft.EntityFrameworkCore
 
                         System.ComponentModel.DataAnnotations.Schema.ColumnAttribute ca = pi.GetCustomAttribute(typeof(System.ComponentModel.DataAnnotations.Schema.ColumnAttribute)) as System.ComponentModel.DataAnnotations.Schema.ColumnAttribute;
                         string name = ca?.Name ?? pi.Name;
+                        name = ConvertName(databaseFacade.ProviderName, name); //支持不同的数据库
 
                         if (pi == null) continue;
 

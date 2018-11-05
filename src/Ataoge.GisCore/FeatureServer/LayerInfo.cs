@@ -244,7 +244,7 @@ namespace Ataoge.GisCore.FeatureServer
 
         //public string Field3 {get;set;}
 
-        public SymbolInfo Symbol {get; set;}
+        public ISymbolInfo Symbol {get; set;}
 
 
        public string Label {get; set; } = "";
@@ -257,7 +257,38 @@ namespace Ataoge.GisCore.FeatureServer
         
     }
 
-    public class SymbolInfo
+    public interface ISymbolInfo
+    {
+
+    }
+
+    public class BaseSymbolInfo : ISymbolInfo
+    {
+        public string Type {get;set;}
+
+        public string Style {get; set;}
+
+
+
+        public int[] Color {get; set;}
+
+        public Outline Outline {get; set;} 
+    }
+
+    public class LineSymbolInfo : ISymbolInfo
+    {
+        public string Type {get;set;}
+
+        public string Style {get; set;}
+
+
+
+        public int[] Color {get; set;}
+
+        public double Width {get; set;} = 1;
+    }
+
+    public class SymbolInfo : ISymbolInfo
     {
         public string Type {get;set;}
 
@@ -278,11 +309,21 @@ namespace Ataoge.GisCore.FeatureServer
         public Outline Outline {get; set;} 
     }
 
+    
+
     public class Outline
     {
         public int[] Color {get; set;}
 
         public double Width {get; set;} = 1;
+    }
+
+    public class FullOutline : Outline
+    {
+        public string Type {get;set;}
+
+        public string Style {get; set;}
+
     }
 
     public class TimeInfo

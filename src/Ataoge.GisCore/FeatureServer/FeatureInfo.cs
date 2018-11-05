@@ -17,9 +17,11 @@ namespace Ataoge.GisCore.FeatureServer
             Attributes = new Dictionary<string, object>();
         }
 
+        
+        public IGeometry Geometry {get; set;}
+
         public IDictionary<string, object> Attributes {get; set;}
 
-        public IGeometry Geometry {get; set;}
 
         
     }

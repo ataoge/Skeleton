@@ -1,7 +1,10 @@
 using System.Text;
+using Ataoge.GisCore.Geometry.Converters;
+using Newtonsoft.Json;
 
 namespace Ataoge.GisCore.Geometry
 {
+    [JsonConverter(typeof(EsriPointCollectionConverter))]
     public class EsriPointCollection : ObservableCollection<EsriPoint>
     {
         public override bool IsReadOnly { get { return true; } }

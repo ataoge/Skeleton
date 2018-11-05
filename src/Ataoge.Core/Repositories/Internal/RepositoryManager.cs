@@ -31,5 +31,14 @@ namespace Ataoge.Repositories.Internal
                 return null;
             return this.ServiceProvider.GetService(attr.RepostitoryInterface)  as IRepository<TEntity>;
         }
+
+        public TRepository GetRepository<TEntity, TRepository>() where TEntity : class, IEntity where TRepository : class
+        {
+            Type type = typeof(TEntity);
+            DbTableAttribute attr = (DbTableAttribute)Attribute.GetCustomAttribute(type, DbTableAttributeType);
+            if (attr == null || attr.RepostitoryInterface == null)
+                return null;
+            return this.ServiceProvider.GetService(attr.RepostitoryInterface)  as TRepository;
+        }
     }
 }
