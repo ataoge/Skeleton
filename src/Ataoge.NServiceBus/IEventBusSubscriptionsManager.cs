@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Ataoge.EventBus.Abstractions;
 using Ataoge.EventBus.Event;
+using static Ataoge.EventBus.InMemoryEventBusSubscriptionsManager;
 
 namespace Ataoge.EventBus
 {
