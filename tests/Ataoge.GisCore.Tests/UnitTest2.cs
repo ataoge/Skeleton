@@ -110,6 +110,36 @@ namespace Ataoge.GisCore.Tests
             MapXYToLatLon(461574.705, 3271333.382, out lat, out lon);
         }
 
+        [Fact]
+        public void TestFoshanCoord()
+        {
+            var x=709166.323;
+            var y= 2537840.304;
+            FS2000ToBL(x, y, out double lng, out double lat);
+
+
+            lng=116.35;
+            lat = 35.25;
+            BLToJN2000(lng, lat, out x, out y);
+        }
+
+
+        public static void FS2000ToBL(double x, double y, out double lng, out double lat)
+        {
+            TransverseMercatorHelper.XYToBL_CGCS2000(x, y, out lng, out lat, 113.0, 700000.0);
+        }
+
+        public static void JN2000ToBL(double x, double y, out double lng, out double lat)
+        {
+            //370800
+            TransverseMercatorHelper.XYToBL_CGCS2000(x, y, out lng, out lat, 117.0, 39500000.0);
+        } 
+
+        public static void BLToJN2000(double lng, double lat, out double x, out double y)
+        {
+            TransverseMercatorHelper.BLToXY_CGCS2000(lng, lat, out x, out y, 117.0, 500000);
+        }
+
         public static void WH54ToBL(double X, double Y, out double longitude, out double latitude, int zoneWide = 6, int projNo = 0)
         {
             
