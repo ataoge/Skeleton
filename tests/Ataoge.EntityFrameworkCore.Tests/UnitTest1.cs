@@ -26,6 +26,8 @@ namespace Ataoge.EntityFrameworkCore.Tests
             IServiceCollection services = new ServiceCollection();
 
             services.AddSingleton<ILoggerFactory, LoggerFactory>();
+
+            services.AddLogging(configure => configure.AddConsole().SetMinimumLevel(LogLevel.Debug));
             
             services.AddDbContext<TestDbContext>(options => {
                 options.UseSqlite("Data Source=test.db");
@@ -34,8 +36,8 @@ namespace Ataoge.EntityFrameworkCore.Tests
             });
 
             IServiceProvider sp = services.BuildServiceProvider();
-            var loggerFactory = sp.GetService<ILoggerFactory>();
-            loggerFactory.AddConsole(LogLevel.Debug);
+            //var loggerFactory = sp.GetService<ILoggerFactory>();
+            //loggerFactory.AddConsole(LogLevel.Debug);
             //loggerFactory.AddDebug();
 
      
@@ -120,9 +122,11 @@ namespace Ataoge.EntityFrameworkCore.Tests
         [Fact]
         public void TestAuthSQL()
         {
-             IServiceCollection services = new ServiceCollection();
+            IServiceCollection services = new ServiceCollection();
 
-            services.AddSingleton<ILoggerFactory, LoggerFactory>();
+
+            services.AddLogging(configure => configure.AddConsole());
+            
             
             services.AddDbContext<TestDbContext>(options => {
                 options.UseSqlite("Data Source=test.db");
@@ -131,9 +135,7 @@ namespace Ataoge.EntityFrameworkCore.Tests
             });
 
             IServiceProvider sp = services.BuildServiceProvider();
-            var loggerFactory = sp.GetService<ILoggerFactory>();
-            loggerFactory.AddConsole(LogLevel.Debug);
-            //loggerFactory.AddDebug();
+            
 
      
             using(var dbContext = sp.GetService<TestDbContext>())

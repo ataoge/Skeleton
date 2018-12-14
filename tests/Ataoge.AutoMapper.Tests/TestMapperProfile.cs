@@ -8,7 +8,7 @@ namespace Ataoge.AutoMapper.Tests
         public TestMapperProfile()
         {
              CreateMap<TestEntity, TestDto>(MemberList.Destination)
-                .ForMember(t => t.Url, opt => opt.ResolveUsing<TestValueResolver>());
+                .ForMember(t => t.Url, opt => opt.MapFrom<TestValueResolver>());
         }
 
     }
