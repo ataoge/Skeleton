@@ -14,6 +14,8 @@ namespace Ataoge.EntityFrameworkCore.Tests
 
         }
 
+        public DbSet<RoleInfo> Roles {get; set;}
+
         public TestDbContext()
         {
 
@@ -81,6 +83,15 @@ namespace Ataoge.EntityFrameworkCore.Tests
                 overrideDcits[key] = value;
             }
         }
+    }
+
+    public class RoleInfo : ITreeEntity<int>
+    {
+        public int Id { get; set;}
+
+        public int? Pid {get; set;}
+
+        public string Name {get; set;}
     }
 
     public class Test

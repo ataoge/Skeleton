@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Ataoge.Data.Entities;
 using Ataoge.EntityFrameworkCore.ModelConfiguration.Infrastructure;
+using Ataoge.EntityFrameworkCore.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,8 +27,6 @@ namespace Ataoge.EntityFrameworkCore.Tests
             IServiceCollection services = new ServiceCollection();
 
             services.AddSingleton<ILoggerFactory, LoggerFactory>();
-
-            services.AddLogging(configure => configure.AddConsole().SetMinimumLevel(LogLevel.Debug));
             
             services.AddDbContext<TestDbContext>(options => {
                 options.UseSqlite("Data Source=test.db");
@@ -36,8 +35,8 @@ namespace Ataoge.EntityFrameworkCore.Tests
             });
 
             IServiceProvider sp = services.BuildServiceProvider();
-            //var loggerFactory = sp.GetService<ILoggerFactory>();
-            //loggerFactory.AddConsole(LogLevel.Debug);
+            var loggerFactory = sp.GetService<ILoggerFactory>();
+            loggerFactory.AddConsole(LogLevel.Debug);
             //loggerFactory.AddDebug();
 
      
@@ -120,13 +119,29 @@ namespace Ataoge.EntityFrameworkCore.Tests
         }
 
         [Fact]
-        public void TestAuthSQL()
+        public void TestGetChildren()
         {
             IServiceCollection services = new ServiceCollection();
 
-
-            services.AddLogging(configure => configure.AddConsole());
             
+            services.AddDbContext<TestDbContext>(options => {
+                options.UseSqlite("Data Source=test.db");
+                options.AddEntityTypeConfigurations();
+            });
+            services.AddScoped<IDbContextProvider<TestDbContext>, DefaultDbContextProvider<TestDbContext>>();
+            IServiceProvider sp = services.BuildServiceProvider();
+            
+            var db = sp.GetService<IDbContextProvider<TestDbContext>>();
+            var repository = new EfCoreTreeRepositoryBase<TestDbContext, RoleInfo, int>(db);
+            var roles = repository.GetAllChildren(t => t.Id == 0,true);
+        }
+
+        [Fact]
+        public void TestAuthSQL()
+        {
+             IServiceCollection services = new ServiceCollection();
+
+            services.AddSingleton<ILoggerFactory, LoggerFactory>();
             
             services.AddDbContext<TestDbContext>(options => {
                 options.UseSqlite("Data Source=test.db");
@@ -135,7 +150,9 @@ namespace Ataoge.EntityFrameworkCore.Tests
             });
 
             IServiceProvider sp = services.BuildServiceProvider();
-            
+            var loggerFactory = sp.GetService<ILoggerFactory>();
+            loggerFactory.AddConsole(LogLevel.Debug);
+            //loggerFactory.AddDebug();
 
      
             using(var dbContext = sp.GetService<TestDbContext>())

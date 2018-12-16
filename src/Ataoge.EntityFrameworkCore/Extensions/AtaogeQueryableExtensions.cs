@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.EntityFrameworkCore.Query.Expressions;
@@ -22,12 +24,13 @@ namespace System.Linq
 
         private static readonly FieldInfo QueryCompilerField = typeof(EntityQueryProvider).GetTypeInfo().DeclaredFields.First(x => x.Name == "_queryCompiler");
 
-        private static readonly PropertyInfo NodeTypeProviderField = QueryCompilerTypeInfo.DeclaredProperties.Single(x => x.Name == "NodeTypeProvider");
+        private static readonly FieldInfo QueryModelGeneratorField =  QueryCompilerTypeInfo.DeclaredFields.Single(x => x.Name == "_queryModelGenerator");
+        //private static readonly PropertyInfo NodeTypeProviderField = QueryCompilerTypeInfo.DeclaredProperties.Single(x => x.Name == "NodeTypeProvider");
 
-        private static readonly MethodInfo CreateQueryParserMethod = QueryCompilerTypeInfo.DeclaredMethods.First(x => x.Name == "CreateQueryParser");
- 
+        //private static readonly MethodInfo CreateQueryParserMethod = QueryCompilerTypeInfo.DeclaredMethods.First(x => x.Name == "CreateQueryParser");
+        private static readonly FieldInfo LoggerField = QueryCompilerTypeInfo.DeclaredFields.Single(x => x.Name == "_logger");
 
-        private static readonly MethodInfo ExtractParametersMethod = QueryCompilerTypeInfo.DeclaredMethods.First(x => x.Name == "ExtractParameters");
+        //private static readonly MethodInfo ExtractParametersMethod = QueryCompilerTypeInfo.DeclaredMethods.First(x => x.Name == "ExtractParameters");
         private static readonly FieldInfo QueryContextFactoryField = QueryCompilerTypeInfo.DeclaredFields.Single(x => x.Name == "_queryContextFactory");
 
 
@@ -57,17 +60,26 @@ namespace System.Linq
             var queryCompiler = (IQueryCompiler)QueryCompilerField.GetValue(query.Provider); //(IQueryCompiler)
 
             Expression expression = query.Expression;
+
+            var queryModelGenerator = (IQueryModelGenerator)QueryModelGeneratorField.GetValue(queryCompiler);
+            var queryModel = queryModelGenerator.ParseQuery(expression);
+
             if (useParameters)  //采用参数模式替换
             {
                 var queryContextFactory=(IQueryContextFactory)QueryContextFactoryField.GetValue(queryCompiler);
                 var queryContext = queryContextFactory.Create();
-                expression = (Expression) ExtractParametersMethod.Invoke(queryCompiler, new object[] {query.Expression, queryContext, true});
+                //expression = (Expression) ExtractParametersMethod.Invoke(queryCompiler, new object[] {query.Expression, queryContext, true});
+
+                var logger = (IDiagnosticsLogger<DbLoggerCategory.Query>) LoggerField.GetValue(queryCompiler);
+                expression = (Expression) queryModelGenerator.ExtractParameters(logger, expression, queryContext);
             }
 
-            var nodeTypeProvider = (INodeTypeProvider)NodeTypeProviderField.GetValue(queryCompiler);
-            var parser = (IQueryParser)CreateQueryParserMethod.Invoke(queryCompiler, new object[] { nodeTypeProvider });
+            //var nodeTypeProvider = (INodeTypeProvider)NodeTypeProviderField.GetValue(queryCompiler);
+            //var parser = (IQueryParser)CreateQueryParserMethod.Invoke(queryCompiler, new object[] { nodeTypeProvider });
             
-            var queryModel = parser.GetParsedQuery(expression);//query.Expression);
+            //var queryModel = parser.GetParsedQuery(expression);//query.Expression);
+            
+            
             var database = DataBaseField.GetValue(queryCompiler);
             var dp = (DatabaseDependencies)Dependencies.GetValue(database);
             var queryCompilationContextFactory = dp.QueryCompilationContextFactory;// (IQueryCompilationContextFactory)QueryCompilationContextFactoryField.GetValue(database);
@@ -86,14 +98,22 @@ namespace System.Linq
             }
 
             var queryCompiler = (IQueryCompiler)QueryCompilerField.GetValue(query.Provider);
+            Expression expression = query.Expression;
+            
+            var queryModelGenerator = (IQueryModelGenerator)QueryModelGeneratorField.GetValue(queryCompiler);
+            var queryModel = queryModelGenerator.ParseQuery(expression);
 
             var queryContextFactory=(IQueryContextFactory)QueryContextFactoryField.GetValue(queryCompiler);
             var queryContext = queryContextFactory.Create();
-            Expression expression = (Expression) ExtractParametersMethod.Invoke(queryCompiler, new object[] {query.Expression, queryContext, true});
-           
-            var nodeTypeProvider = (INodeTypeProvider)NodeTypeProviderField.GetValue(queryCompiler);
-            var parser = (IQueryParser)CreateQueryParserMethod.Invoke(queryCompiler, new object[] { nodeTypeProvider });
-            var queryModel = parser.GetParsedQuery(expression);
+            //Expression expression = (Expression) ExtractParametersMethod.Invoke(queryCompiler, new object[] {query.Expression, queryContext, true});
+            var logger = (IDiagnosticsLogger<DbLoggerCategory.Query>) LoggerField.GetValue(queryCompiler);
+            expression = (Expression) queryModelGenerator.ExtractParameters(logger, expression, queryContext);
+
+            //var nodeTypeProvider = (INodeTypeProvider)NodeTypeProviderField.GetValue(queryCompiler);
+            //var parser = (IQueryParser)CreateQueryParserMethod.Invoke(queryCompiler, new object[] { nodeTypeProvider });
+            //var queryModel = parser.GetParsedQuery(expression);
+            
+            
             var database = DataBaseField.GetValue(queryCompiler);
             var dp = (DatabaseDependencies)Dependencies.GetValue(database);
             var queryCompilationContextFactory = dp.QueryCompilationContextFactory;// (IQueryCompilationContextFactory)QueryCompilationContextFactoryField.GetValue(database);
