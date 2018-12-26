@@ -142,10 +142,21 @@ namespace Ataoge.EntityFrameworkCore.Repositories
                 whereQueryParament = startQuery.Parameters[0].Name;
                 if (whereQueryParament == startQueryParament)
                 {
-                    string forReplace = "\"" + startQueryParament + "\"";
-                    whereQueryParament += startQueryParament;
-                    string toReplace = "\"" + whereQueryParament + "\"";
-                    secondQuery = secondQuery.Replace(forReplace, toReplace);
+                    if (forNpgsql)
+                    {
+                        string forReplace =  startQueryParament + ".";
+                        whereQueryParament += startQueryParament;
+                        string toReplace =  whereQueryParament + ".";
+                        secondQuery = secondQuery.Replace(forReplace, toReplace);
+                         secondQuery = secondQuery.Replace("AS " + startQueryParament , "AS " + whereQueryParament);
+                    }
+                    else
+                    {
+                        string forReplace = "\"" + startQueryParament + "\"";
+                        whereQueryParament += startQueryParament;
+                        string toReplace = "\"" + whereQueryParament + "\"";
+                        secondQuery = secondQuery.Replace(forReplace, toReplace);
+                    }
                 }
                 if (forNpgsql)
                 {
@@ -283,10 +294,22 @@ namespace Ataoge.EntityFrameworkCore.Repositories
                 whereQueryParament = whereQuery.Parameters[0].Name;
                 if (whereQueryParament == startQueryParament)
                 {
-                    string forReplace = "\"" + startQueryParament + "\"";
-                    whereQueryParament += startQueryParament;
-                    string toReplace = "\"" + whereQueryParament + "\"";
-                    secondQuery = secondQuery.Replace(forReplace, toReplace);
+                    if (forNpgsql)
+                    {
+                        string forReplace =  startQueryParament + ".";
+                        whereQueryParament += startQueryParament;
+                        string toReplace =  whereQueryParament + ".";
+                        secondQuery = secondQuery.Replace(forReplace, toReplace);
+                        secondQuery = secondQuery.Replace("AS " + startQueryParament , "AS " + whereQueryParament);
+                    }
+                    else
+                    {
+                        
+                        string forReplace = "\"" + startQueryParament + "\"";
+                        whereQueryParament += startQueryParament;
+                        string toReplace = "\"" + whereQueryParament + "\"";
+                        secondQuery = secondQuery.Replace(forReplace, toReplace);
+                    }
                 }
                 if (forNpgsql)
                 {
@@ -433,10 +456,21 @@ namespace Ataoge.EntityFrameworkCore.Repositories
                 whereQueryParament = whereQuery.Parameters[0].Name;
                 if (whereQueryParament == startQueryParament)
                 {
-                    string forReplace = "\"" + startQueryParament + "\"";
-                    whereQueryParament += startQueryParament;
-                    string toReplace = "\"" + whereQueryParament + "\"";
-                    secondQuery = secondQuery.Replace(forReplace, toReplace);
+                    if (forNpgsql)
+                    {
+                        string forReplace =  startQueryParament + ".";
+                        whereQueryParament += startQueryParament;
+                        string toReplace =  whereQueryParament + ".";
+                        secondQuery = secondQuery.Replace(forReplace, toReplace);
+                        secondQuery = secondQuery.Replace("AS " + startQueryParament , "AS " + whereQueryParament);
+                    }
+                    else
+                    {
+                        string forReplace = "\"" + startQueryParament + "\"";
+                        whereQueryParament += startQueryParament;
+                        string toReplace = "\"" + whereQueryParament + "\"";
+                        secondQuery = secondQuery.Replace(forReplace, toReplace);
+                    }
                 }
                 if (forNpgsql)
                 {
