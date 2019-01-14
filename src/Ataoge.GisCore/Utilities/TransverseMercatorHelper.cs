@@ -1,9 +1,26 @@
 using System;
+using System.Collections.Generic;
 
 namespace Ataoge.GisCore.Utilities
 {
     public static class TransverseMercatorHelper
     {
+        static TransverseMercatorHelper()
+        {
+            //WuHan2000
+            _dictArgs.Add(420100, new TMInfo(){ CentralMeridian = 114.3333333333, FalseEasting = 800000, FalseNorthing = -3000000});
+            //Foshan2000
+            _dictArgs.Add(440600, new TMInfo(){ CentralMeridian = 113.0, FalseEasting = 700000.0});
+            //Jining2000
+            _dictArgs.Add(370800, new TMInfo(){ CentralMeridian = 117.0, FalseEasting = 39500000.0});
+
+            //GZ2000
+            _dictArgs.Add(440100, new TMInfo(){ CentralMeridian = 113.0,});
+
+        }
+
+        private static IDictionary<int, TMInfo> _dictArgs = new Dictionary<int, TMInfo>();
+
         public const double CGCS2000_SEMIMAJORAXIS = 6378137.0; //CGSC2000 WGS84 椭球体 长半轴
         public const double CGCS2000_SEMIMINORAXIS = 6356752.3141403558; // CGSC2000 WGS84 椭球体 长半轴
         public const double CGCS2000_FLATTENING = 1 / 298.257222101; // CGCS2000 WGS84 扁率
@@ -26,6 +43,37 @@ namespace Ataoge.GisCore.Utilities
 
         public const double ANGULARUNIT_DEGREE = 0.0174532925199433; // 角度单位 弧度  iPI 3.1415926535898/180.0;
 
+         ///<summary>
+        /// CGCS2000 经纬度转地方平面坐标
+        ///<summary>
+        /// <param name="lon">经度,小数度</param>
+        /// <param name="lat">纬度，小数度</param>
+        /// <param name="srid">地方两千坐标srid</param>
+        /// <param name="x">返回X坐标，单位米</param>
+        /// <param name="y">返回Y坐标，单位米</param>
+        public static void BLToLocal2000(double lon, double lat, int srid, out double x, out double y)
+        {
+            if (!_dictArgs.ContainsKey(srid))
+                throw new NotSupportedException();
+            var tmInfo = _dictArgs[srid];
+            BLToYXCore(lat, lon, out y, out x, CGCS2000_SEMIMAJORAXIS, CGCS2000_FLATTENING, tmInfo.CentralMeridian, tmInfo.FalseEasting, tmInfo.FalseNorthing, tmInfo.ScaleFactor, tmInfo.LatitudeOfOrigin);
+        }
+
+        ///<summary>
+        /// 地方2000 平面坐标转经纬度
+        ///<summary>
+        /// <param name="y">返回Y坐标，单位米</param>
+        /// <param name="x">返回X坐标，单位米</param>
+        /// <param name="srid">地方两千坐标srid</param>
+        /// <param name="lat">纬度，小数度</param>
+        /// <param name="lon">经度,小数度</param>
+        public static void Local2000ToBL(double x, double y, int srid, out double lon, out double lat)
+        {
+             if (!_dictArgs.ContainsKey(srid))
+                throw new NotSupportedException();
+            var tmInfo = _dictArgs[srid];
+            YXToBLCore(x, y, out lat, out lon, CGCS2000_SEMIMAJORAXIS, CGCS2000_FLATTENING, tmInfo.CentralMeridian, tmInfo.FalseEasting, tmInfo.FalseNorthing, tmInfo.ScaleFactor, tmInfo.LatitudeOfOrigin);
+        }
 
         ///<summary>
         /// CGCS2000 经纬度转平面坐标
