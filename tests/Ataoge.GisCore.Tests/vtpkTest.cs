@@ -1,6 +1,8 @@
 using System;
 using System.IO;
 using System.IO.Compression;
+using System.Text;
+using Ataoge.GisCore.VectorTiles;
 using Ataoge.GisCore.Wmts;
 using Xunit;
 
@@ -71,6 +73,7 @@ namespace Ataoge.GisCore.Tests
         [Fact]
         public void TestTile()
         {
+
             //var aa = ArcGISBundleFileHelper.GetTileImage_VTPK(8,104,209, @"E:\Downloads\wh_district_slqp_WebUTM.vtpk");
             ArcGISTileSystem ts = new ArcGISTileSystem();
             ts.SetXYOriginShift(20037508.342787001, -20037508.342787001);
@@ -88,6 +91,45 @@ namespace Ataoge.GisCore.Tests
                 Console.WriteLine($"{i} {tm.MinRow} {tm.MaxRow}  {tm.MinCol} {tm.MaxRow}");
             }
 
+        }
+
+        [Fact()]
+        public void TestVectTile()
+        {
+            var pbf = File.ReadAllBytes(@"E:\Downloads\63.pbf");
+            VectorTile vt = new VectorTile(pbf, false);
+            foreach (var layerName in vt.LayerNames())
+            {
+                VectorTileLayer layer = vt.GetLayer(layerName);
+                for (int j = 0; j < layer.FeatureCount(); j++)
+                {
+                    VectorTileFeature feat = layer.GetFeature(j);
+                    var ff = feat.Geometry<long>();
+                    var props = feat.GetProperties();
+                }
+            }
+        }
+
+        [Fact()]
+        public void TestLodXml()
+        {
+            var initResolution = 390.625 * 2 * 2 * 2 * 2;
+            var initScale = initResolution * 96 / 0.0254;
+            var maxZoom = 20;
+            StringBuilder sb = new StringBuilder();
+            for (var i = 0; i <= maxZoom; i++)
+            {
+                sb.Append(@"<LODInfo xsi:type='typens:LODInfo'>");
+                sb.Append($"<LevelID>{i}</LevelID>");
+	            sb.Append($"<Scale>{initScale}</Scale>");
+	            sb.Append($"<Resolution>{initResolution}</Resolution>");
+                sb.Append("</LODInfo>");
+                sb.Append("\n");
+                initScale = initScale / 2;
+                initResolution = initResolution / 2;
+            }
+
+            Console.Write(sb.ToString());
         }
     }
 }
