@@ -294,6 +294,12 @@ namespace  Ataoge.EntityFrameworkCore
 
         }
 
+        public IRepositoryTransaction BeginTransaction()
+        {
+            var transaction = Database.BeginTransaction();
+            return new EfCoreRepositoryTransaction(transaction);
+        }
+
         /* 
         ///<summary>
         /// 返回当前几何空间数据的SRID值

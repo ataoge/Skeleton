@@ -8,6 +8,11 @@ namespace Ataoge.Repositories
     {
         public bool SupportSpatial => false;
 
+        public IRepositoryTransaction BeginTransaction()
+        {
+            throw new NotImplementedException();
+        }
+
         public int SaveChanges()
         {
             return 0;
