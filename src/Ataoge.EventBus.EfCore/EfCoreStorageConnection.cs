@@ -45,30 +45,43 @@ namespace Ataoge.EventBus.EfCore
 
         public async Task<PublishedMessage> GetPublishedMessageAsync(long id)
         {
-            var dbContext = (DbContext)_serviceProvider.GetRequiredService(Options.DbContextType);
-            return await dbContext.Set<PublishedMessage>().FirstOrDefaultAsync(t => t.Id == id);
+            using (var scope = CreateScope())
+            {
+                var dbContext = (DbContext)scope.ServiceProvider.GetRequiredService(Options.DbContextType);
+                return await dbContext.Set<PublishedMessage>().FirstOrDefaultAsync(t => t.Id == id);
+            }
         }
 
         public async Task<IEnumerable<PublishedMessage>> GetPublishedMessagesOfNeedRetry()
         {
             var fourMinsAgo = DateTime.Now.AddMinutes(-4);
-            var dbContext = (DbContext)_serviceProvider.GetRequiredService(Options.DbContextType);
-            var messages = dbContext.Set<PublishedMessage>().Where(t => t.Retries < _configOptions.FailedRetryCount && t.Added < fourMinsAgo && (t.StatusName == StatusName.Failed || t.StatusName == StatusName.Scheduled)).Take(200);
-            return await messages.ToListAsync();
+            using (var scope = CreateScope())
+            {
+                var dbContext = (DbContext)scope.ServiceProvider.GetRequiredService(Options.DbContextType);
+                var messages = dbContext.Set<PublishedMessage>().Where(t => t.Retries < _configOptions.FailedRetryCount && t.Added < fourMinsAgo && (t.StatusName == StatusName.Failed || t.StatusName == StatusName.Scheduled)).Take(200);
+
+                return await messages.ToListAsync();
+            }
         }
 
         public async Task<ReceivedMessage> GetReceivedMessageAsync(long id)
         {
-            var dbContext = (DbContext)_serviceProvider.GetRequiredService(Options.DbContextType);
-            return await dbContext.Set<ReceivedMessage>().FirstOrDefaultAsync(t => t.Id == id);
+            using (var scope = CreateScope())
+            {
+                var dbContext = (DbContext)scope.ServiceProvider.GetRequiredService(Options.DbContextType);
+                return await dbContext.Set<ReceivedMessage>().FirstOrDefaultAsync(t => t.Id == id);
+            }
         }
 
         public async Task<IEnumerable<ReceivedMessage>> GetReceivedMessagesOfNeedRetry()
         {
             var fourMinsAgo = DateTime.Now.AddMinutes(-4);
-            var dbContext = (DbContext)_serviceProvider.GetRequiredService(Options.DbContextType);
-            var messages = dbContext.Set<ReceivedMessage>().Where(t => t.Retries < _configOptions.FailedRetryCount && t.Added < fourMinsAgo && (t.StatusName == StatusName.Failed || t.StatusName == StatusName.Scheduled)).Take(200);
-            return await messages.ToListAsync();
+            using (var scope = CreateScope())
+            {
+                var dbContext = (DbContext)scope.ServiceProvider.GetRequiredService(Options.DbContextType);
+                var messages = dbContext.Set<ReceivedMessage>().Where(t => t.Retries < _configOptions.FailedRetryCount && t.Added < fourMinsAgo && (t.StatusName == StatusName.Failed || t.StatusName == StatusName.Scheduled)).Take(200);
+                return await messages.ToListAsync();
+            }
         }
 
         public void StoreReceivedMessage(ReceivedMessage message)
@@ -77,10 +90,13 @@ namespace Ataoge.EventBus.EfCore
             {
                 throw new ArgumentNullException(nameof(message));
             }
-            var dbContext = (DbContext)_serviceProvider.GetRequiredService(Options.DbContextType);
-            dbContext.Entry(message).Property("Version").CurrentValue = Options.Version;
-            dbContext.Set<ReceivedMessage>().Add(message);
-            dbContext.SaveChanges();
+            using (var scope = CreateScope())
+            {
+                var dbContext = (DbContext)scope.ServiceProvider.GetRequiredService(Options.DbContextType);
+                dbContext.Entry(message).Property("Version").CurrentValue = Options.Version;
+                dbContext.Set<ReceivedMessage>().Add(message);
+                dbContext.SaveChanges();
+            }
         }
     }
 }

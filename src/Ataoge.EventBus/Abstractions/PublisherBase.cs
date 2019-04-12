@@ -49,7 +49,7 @@ namespace Ataoge.EventBus
             PublishAsyncInternal(message).GetAwaiter().GetResult();
         }
 
-        public async Task PublishAsync<T>(string name, T contentObj, string callbackName = null, CancellationToken cancellationToken = default)
+        public async Task PublishAsync<T>(string name, T contentObj, string callbackName = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             var message = new PublishedMessage
             {

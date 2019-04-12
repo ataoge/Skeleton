@@ -1,6 +1,10 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
+using Ataoge.EventBus.Models;
 using Ataoge.EventBus.Processor;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Ataoge.EventBus.EfCore
@@ -28,26 +32,44 @@ namespace Ataoge.EventBus.EfCore
 
         public async Task ProcessAsync(ProcessingContext context)
         {
-            foreach (var table in Tables)
+            using (var scope = context.Provider.CreateScope())
             {
-                _logger.LogDebug($"Collecting expired data from table [{table}].");
-
-                var removedCount = 0;
-                do
+                foreach (var table in Tables)
                 {
-                    //using (var connection = new NpgsqlConnection(_options.ConnectionString))
-                    //{
-                    //    removedCount = await connection.ExecuteAsync(
-                    //        $"DELETE FROM \"{_options.Schema}\".\"{table}\" WHERE \"ExpiresAt\" < @now AND \"Id\" IN (SELECT \"Id\" FROM \"{_options.Schema}\".\"{table}\" LIMIT @count);",
-                    //        new {now = DateTime.Now, count = MaxBatch});
-                    //}
+                    _logger.LogDebug($"Collecting expired data from table [{table}].");
 
-                    if (removedCount != 0)
+                    var removedCount = 0;
+                    do
                     {
-                        await context.WaitAsync(_delay);
-                        context.ThrowIfStopping();
-                    }
-                } while (removedCount != 0);
+
+                        var dbContext = (DbContext)scope.ServiceProvider.GetRequiredService(_options.DbContextType);
+                        if (table == "published")
+                        {
+                            var entities = dbContext.Set<PublishedMessage>().Where(t => t.ExpiresAt < DateTime.Now).Take(MaxBatch);
+                            dbContext.Set<PublishedMessage>().RemoveRange(entities);
+                            await dbContext.SaveChangesAsync();
+                        }
+                        else
+                        {
+                            var entities = dbContext.Set<ReceivedMessage>().Where(t => t.ExpiresAt < DateTime.Now).Take(MaxBatch);
+                            dbContext.Set<ReceivedMessage>().RemoveRange(entities);
+                            await dbContext.SaveChangesAsync();
+                        }
+
+                        //using (var connection = new NpgsqlConnection(_options.ConnectionString))
+                        //{
+                        //    removedCount = await connection.ExecuteAsync(
+                        //        $"DELETE FROM \"{_options.Schema}\".\"{table}\" WHERE \"ExpiresAt\" < @now AND \"Id\" IN (SELECT \"Id\" FROM \"{_options.Schema}\".\"{table}\" LIMIT @count);",
+                        //        new {now = DateTime.Now, count = MaxBatch});
+                        //}
+
+                        if (removedCount != 0)
+                        {
+                            await context.WaitAsync(_delay);
+                            context.ThrowIfStopping();
+                        }
+                    } while (removedCount != 0);
+                }
             }
 
             await context.WaitAsync(_waitingInterval);

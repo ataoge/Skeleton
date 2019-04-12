@@ -37,11 +37,6 @@ namespace Ataoge.EventBus.Processor
             await context.WaitAsync(_waitingInterval);
         }
 
-        Task IProcessor.ProcessAsync(ProcessingContext context)
-        {
-            throw new System.NotImplementedException();
-        }
-
         private async Task ProcessPublishedAsync(IStorageConnection connection, ProcessingContext context)
         {
             var messages = await connection.GetPublishedMessagesOfNeedRetry();

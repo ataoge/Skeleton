@@ -22,7 +22,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="services">The services available in the application.</param>
         /// <param name="setupAction">An action to configure the <see cref="CapOptions" />.</param>
         /// <returns>An <see cref="CapBuilder" /> for application services.</returns>
-        public static ConfigBuilder AddCap(this IServiceCollection services, Action<ConfigOptions> setupAction)
+        public static ConfigBuilder AddEventBus(this IServiceCollection services, Action<ConfigOptions> setupAction)
         {
             if (setupAction == null)
             {
@@ -30,6 +30,11 @@ namespace Microsoft.Extensions.DependencyInjection
             }
 
             services.TryAddSingleton<CapMarkerService>();
+
+            //EventBus
+            services.TryAddSingleton<IEventBusSubscriptionsManager, InMemoryEventBusSubscriptionsManager>();
+            services.TryAddSingleton<IIntergrationEventSubscriberService, DefultIntergrationEventSubscriberService>();
+            services.TryAddScoped<IEventBus, DefaultEventBus>();
 
             //Consumer service
             AddSubscribeServices(services);
@@ -56,6 +61,8 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddSingleton<IDispatcher, Dispatcher>();
             // Warning: IPublishMessageSender need to inject at extension project. 
             services.TryAddSingleton<ISubscriberExecutor, DefaultSubscriberExecutor>();
+
+            
 
             //Options and extension service
             var options = new ConfigOptions();
