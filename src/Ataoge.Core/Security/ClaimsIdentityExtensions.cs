@@ -23,13 +23,13 @@ namespace System.Security.Claims
             return new UserIdentifier<TKey>(identity.GetTenantId(), userId);
         }
 
-        public static TKey GetUserId<TKey>([NotNull] this IIdentity identity)
+        public static TKey GetUserId<TKey>([NotNull] this IIdentity identity, string type = ClaimTypes.NameIdentifier)
         {
             Check.NotNull(identity, nameof(identity));
 
             var claimsIdentity = identity as ClaimsIdentity;
 
-            var userIdOrNull = claimsIdentity?.Claims?.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+            var userIdOrNull = claimsIdentity?.Claims?.FirstOrDefault(c => c.Type == type);
             if (userIdOrNull == null || string.IsNullOrWhiteSpace(userIdOrNull.Value))
             {
                 return default(TKey);
@@ -72,9 +72,9 @@ namespace System.Security.Claims
            
         }
 
-        public static string GetUserId(this ClaimsPrincipal principal)
+        public static string GetUserId(this ClaimsPrincipal principal, string type = ClaimTypes.NameIdentifier)
         {
-            return GetValue(principal, ClaimTypes.NameIdentifier);
+            return GetValue(principal, type);
         }
      }
 }

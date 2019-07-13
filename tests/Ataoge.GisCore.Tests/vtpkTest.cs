@@ -73,7 +73,6 @@ namespace Ataoge.GisCore.Tests
         [Fact]
         public void TestTile()
         {
-
             //var aa = ArcGISBundleFileHelper.GetTileImage_VTPK(8,104,209, @"E:\Downloads\wh_district_slqp_WebUTM.vtpk");
             ArcGISTileSystem ts = new ArcGISTileSystem();
             ts.SetXYOriginShift(20037508.342787001, -20037508.342787001);

@@ -24,6 +24,13 @@
             "type": "process",
             "args": ["build", "${workspaceRoot}/tests/Ataoge.EntityFrameworkCore.Tests/Ataoge.EntityFrameworkCore.Tests.csproj" ],
             "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "build DashboardTest",
+            "command": "dotnet",
+            "type": "process",
+            "args": ["build", "${workspaceRoot}/tests/Ataoge.EventBus.DashboardTest/Ataoge.EventBus.DashboardTest.csproj" ],
+            "problemMatcher": "$msCompile"
         }
     ]
 }

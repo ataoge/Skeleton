@@ -15,8 +15,8 @@ namespace Ataoge.GisCore.Utilities
             _dictArgs.Add(370800, new TMInfo(){ CentralMeridian = 117.0, FalseEasting = 39500000.0});
 
             //GZ2000
-            _dictArgs.Add(440100, new TMInfo(){ CentralMeridian = 113.0,});
-
+            //_dictArgs.Add(440100, new TMInfo(){ CentralMeridian = 113.283333333, FalseEasting = 40000.0, FalseNorthing = -2529600});
+            _dictArgs.Add(440100, new TMInfo(){ CentralMeridian = 113.259036, FalseEasting = 0.0, FalseNorthing = 0});
         }
 
         private static IDictionary<int, TMInfo> _dictArgs = new Dictionary<int, TMInfo>();

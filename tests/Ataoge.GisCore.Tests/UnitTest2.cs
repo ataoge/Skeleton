@@ -99,6 +99,20 @@ namespace Ataoge.GisCore.Tests
         {
             double x;
             double y;
+Utilities.CoordinateTransform.BD09ToGCJ02(39.915052,116.403954,out y, out x);
+Utilities.CoordinateTransform.GCJ02ToWGS84Exact(y,x, out y, out x);
+            
+            //Utilities.CoordinateTransform.WebMercatorToWGS84(2646173.4822,12616007.955, out y, out x);
+            Utilities.CoordinateTransform.WebMercatorToWGS84(2651829.8223,12621664.2956, out y, out x);
+            Utilities.CoordinateTransform.WGS84ToGCJ02(y,x, out y, out x);
+            Utilities.CoordinateTransform.BD09ToGCJ02(y,x,out y, out x);
+            Utilities.CoordinateTransform.BDO9_LL2MC(y,x,out x,out y);
+        
+            
+            TransverseMercatorHelper.XYToBL_BJ54(33217.091, 49377.203,out x,out y, 121.0, 29195.5, -3401413.0);
+
+            TransverseMercatorHelper.BLToLocal2000(113.259036,23.128803, 440100, out x, out y);
+            TransverseMercatorHelper.BLToLocal2000(113.3193437,23.1450084, 440100, out x, out y);
             BLToWH54(114.30, 30.60, out x, out y);
             MapLatLonToXY(30.06, 114.30, out x, out y);
 
@@ -113,6 +127,8 @@ namespace Ataoge.GisCore.Tests
         [Fact]
         public void TestFoshanCoord()
         {
+
+
             var x=709166.323;
             var y= 2537840.304;
             FS2000ToBL(x, y, out double lng, out double lat);
@@ -121,6 +137,13 @@ namespace Ataoge.GisCore.Tests
             lng=116.35;
             lat = 35.25;
             BLToJN2000(lng, lat, out x, out y);
+        }
+
+        [Fact]
+        public void TestGetTileExtent()
+        {
+            var tileExtent = CommonGisTools.GetTileExtent(10, 512, 362, 512, -9501964.729228035, 10001964.729228035, 39070.17472354701);
+
         }
 
 

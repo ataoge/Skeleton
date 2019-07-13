@@ -233,6 +233,35 @@ namespace Ataoge.EntityFrameworkCore.Tests
             //3.根据参数和表达式体构造一个lambda表达式  
             return Expression.Lambda(body, param);  
         }  
+
+
+        [Fact]
+        public void TestDynomic()
+        {
+            var aa = new { Id = 1, Name =2 };
+            var type = aa.GetType();
+            var pp = type.GetProperties();
+        }
+
+        [Fact]
+        public void TestHelpDeserialize()
+        {
+            IServiceCollection services = new ServiceCollection();
+
+            services.AddSingleton<ILoggerFactory, LoggerFactory>();
+            
+            services.AddDbContext<TestDbContext>(options => {
+                options.UseSqlite("Data Source=test.db");
+                options.AddEntityTypeConfigurations();
+                
+            });
+
+            IServiceProvider sp = services.BuildServiceProvider();
+            var dbContext = sp.GetService<TestDbContext>();
+            var dbread = dbContext.Database.ExecuteSqlQuery("select * from RoleInfo");
+            var aa = Helper.GetTypeDeserializerImpl(typeof(RoleInfo),dbread.DbDataReader);
+        
+        }
     }
 
     public interface ISingleton
