@@ -347,15 +347,15 @@ healthchecksdb
 
 # Backup folder for Package Reference Convert tool in Visual Studio 2017
 MigrationBackup/
-© 2019 GitHub, Inc.
-Terms
-Privacy
-Security
-Status
-Help
-Contact GitHub
-Pricing
-API
-Training
-Blog
-About
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+#Mac file
+*.DS_Store
+
+*.pidb
+StyleCop.Cache
+*.snk
+
