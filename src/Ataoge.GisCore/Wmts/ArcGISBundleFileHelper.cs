@@ -134,7 +134,7 @@ namespace Ataoge.GisCore.Wmts
             fs.Seek(startOffset, SeekOrigin.Begin);
             byte[] lengthBytes = new byte[4];
             fs.Read(lengthBytes, 0, 4);
-            int length = BitConverter.ToInt32(indexBytes, 0);
+            int length = BitConverter.ToInt32(lengthBytes, 0);
 
             //根据切片位置和切片长度获取切片
             byte[] tileBytes = new byte[length];
