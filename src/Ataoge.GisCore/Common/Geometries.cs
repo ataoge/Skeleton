@@ -1,3 +1,5 @@
+using System.Linq;
+
 namespace Ataoge.GisCore
 {
     public class PixelPoint
@@ -34,6 +36,10 @@ namespace Ataoge.GisCore
 
     public class MapExtent
     {
+        public MapExtent()
+        {
+
+        }
         public double MinX {get; set;}
 
         public double MaxX {get; set;}
@@ -41,5 +47,29 @@ namespace Ataoge.GisCore
         public double MinY {get; set;}
 
         public double MaxY {get; set;}
+
+        public static MapExtent FromString(string bbox, string format = null)
+        {
+            var bb = bbox.Split(',').Select(s => double.Parse(s)).ToArray();
+            return new MapExtent() { MinX = bb[0], MinY = bb[1], MaxX = bb[2], MaxY = bb[3] };
+        }
+
+        public override string ToString()
+        {
+            return $"MapExtext: {this.MinX},{this.MinY},{this.MaxX},{this.MaxY}";
+        }
+
+        public string ToString(string format)
+        {
+            switch (format)
+            {
+                case "b":
+                case "bbox":
+                   return $"{this.MinX},{this.MinY},{this.MaxX},{this.MaxY}";
+                default:
+                    return ToString();
+            }
+           
+        }
     }
 }

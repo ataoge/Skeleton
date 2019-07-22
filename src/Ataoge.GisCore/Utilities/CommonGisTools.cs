@@ -48,5 +48,27 @@ namespace Ataoge.GisCore.Utilities
             double bottom = oy - (y+1) * tileSize * res;
             return new MapExtent(){MinX = left, MinY = bottom, MaxX = right, MaxY = top};
         }
+
+        public static string GetVectorTileExtentString(int z, int x, int y, double ox = -180, double oy = 90, double? initResolution = null)
+        {
+            double tileSize = initResolution.HasValue ? 512 : 360;
+            double res = initResolution.HasValue ?  initResolution.Value / Math.Pow(2, z) : 1 /Math.Pow(2, z);
+            double minx = res * x * tileSize + ox; // x * res * 360 - 180
+            double maxx = res * (x + 1) * tileSize + ox;
+            double miny, maxy;
+            if (initResolution.HasValue)
+            {
+                maxy = oy - res * y * tileSize;
+                miny = oy - res * (y + 1) * tileSize;
+            }
+            else
+            {
+                // var n = Math.PI - (2.0 * Math.PI * y) / Math.Pow(2, z);  Math.Atan(Math.Sinh(n)) * 180 / Math.PI;
+                maxy = Math.Atan(Math.Sinh(Math.PI - (2.0 * Math.PI * (y+1)) * res)) * 180 / Math.PI;
+                miny = Math.Atan(Math.Sinh(Math.PI - (2.0 * Math.PI * y) * res)) * 180 / Math.PI;
+            }
+
+            return $"{minx}, {miny}, {maxx}, {maxy}";
+        }
     }
 }
