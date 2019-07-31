@@ -72,7 +72,7 @@ namespace Ataoge.GisCore.Utilities
              if (!_dictArgs.ContainsKey(srid))
                 throw new NotSupportedException();
             var tmInfo = _dictArgs[srid];
-            YXToBLCore(x, y, out lat, out lon, CGCS2000_SEMIMAJORAXIS, CGCS2000_FLATTENING, tmInfo.CentralMeridian, tmInfo.FalseEasting, tmInfo.FalseNorthing, tmInfo.ScaleFactor, tmInfo.LatitudeOfOrigin);
+            YXToBLCore(y, x, out lat, out lon, CGCS2000_SEMIMAJORAXIS, CGCS2000_FLATTENING, tmInfo.CentralMeridian, tmInfo.FalseEasting, tmInfo.FalseNorthing, tmInfo.ScaleFactor, tmInfo.LatitudeOfOrigin);
         }
 
         ///<summary>
