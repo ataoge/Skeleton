@@ -125,6 +125,14 @@ namespace Ataoge.Core.Tests
             string json = JsonConvert.SerializeObject(aa);
             var bb = JsonConvert.DeserializeObject<CommonEntity>(json);
         }
+
+         [Fact]
+        public void TestPinyin()
+        {
+
+            var pinyin = PinyinHelper.GetPinyin("我是中国人", false);
+        }
+
     }
 
 

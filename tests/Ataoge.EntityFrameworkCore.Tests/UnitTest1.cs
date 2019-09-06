@@ -34,10 +34,12 @@ namespace Ataoge.EntityFrameworkCore.Tests
                 
             });
 
+            services.AddLogging(loggingBuilder => {
+                loggingBuilder.AddConsole().AddFilter(level => level >= LogLevel.Debug);
+            });
+
             IServiceProvider sp = services.BuildServiceProvider();
-            var loggerFactory = sp.GetService<ILoggerFactory>();
-            loggerFactory.AddConsole(LogLevel.Debug);
-            //loggerFactory.AddDebug();
+          
 
      
             using(var dbContext = sp.GetService<TestDbContext>())
@@ -149,9 +151,14 @@ namespace Ataoge.EntityFrameworkCore.Tests
                 
             });
 
+            services.AddLogging(loggingBuilder => {
+                loggingBuilder.AddConsole().AddFilter(level => level >= LogLevel.Debug);
+                loggingBuilder.AddDebug();
+            });
+
             IServiceProvider sp = services.BuildServiceProvider();
-            var loggerFactory = sp.GetService<ILoggerFactory>();
-            loggerFactory.AddConsole(LogLevel.Debug);
+            //var loggerFactory = sp.GetService<ILoggerFactory>();
+            //loggerFactory.AddConsole(LogLevel.Debug);
             //loggerFactory.AddDebug();
 
      
